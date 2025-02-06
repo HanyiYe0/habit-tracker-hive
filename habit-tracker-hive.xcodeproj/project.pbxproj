@@ -1,0 +1,587 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		8E8D04952D555A5900F5918E /* habit_tracker_hiveApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8D04942D555A5900F5918E /* habit_tracker_hiveApp.swift */; };
+		8E8D04972D555A5900F5918E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8D04962D555A5900F5918E /* ContentView.swift */; };
+		8E8D04992D555A5E00F5918E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8E8D04982D555A5E00F5918E /* Assets.xcassets */; };
+		8E8D049C2D555A5E00F5918E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8E8D049B2D555A5E00F5918E /* Preview Assets.xcassets */; };
+		8E8D04A62D555A5E00F5918E /* habit_tracker_hiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8D04A52D555A5E00F5918E /* habit_tracker_hiveTests.swift */; };
+		8E8D04B02D555A5E00F5918E /* habit_tracker_hiveUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8D04AF2D555A5E00F5918E /* habit_tracker_hiveUITests.swift */; };
+		8E8D04B22D555A5E00F5918E /* habit_tracker_hiveUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8D04B12D555A5E00F5918E /* habit_tracker_hiveUITestsLaunchTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		8E8D04A22D555A5E00F5918E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8E8D04892D555A5900F5918E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8E8D04902D555A5900F5918E;
+			remoteInfo = "habit-tracker-hive";
+		};
+		8E8D04AC2D555A5E00F5918E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8E8D04892D555A5900F5918E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8E8D04902D555A5900F5918E;
+			remoteInfo = "habit-tracker-hive";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		8E8D04912D555A5900F5918E /* habit-tracker-hive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "habit-tracker-hive.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8E8D04942D555A5900F5918E /* habit_tracker_hiveApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = habit_tracker_hiveApp.swift; sourceTree = "<group>"; };
+		8E8D04962D555A5900F5918E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		8E8D04982D555A5E00F5918E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8E8D049B2D555A5E00F5918E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		8E8D04A12D555A5E00F5918E /* habit-tracker-hiveTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "habit-tracker-hiveTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8E8D04A52D555A5E00F5918E /* habit_tracker_hiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = habit_tracker_hiveTests.swift; sourceTree = "<group>"; };
+		8E8D04AB2D555A5E00F5918E /* habit-tracker-hiveUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "habit-tracker-hiveUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8E8D04AF2D555A5E00F5918E /* habit_tracker_hiveUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = habit_tracker_hiveUITests.swift; sourceTree = "<group>"; };
+		8E8D04B12D555A5E00F5918E /* habit_tracker_hiveUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = habit_tracker_hiveUITestsLaunchTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8E8D048E2D555A5900F5918E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8E8D049E2D555A5E00F5918E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8E8D04A82D555A5E00F5918E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		8E8D04882D555A5900F5918E = {
+			isa = PBXGroup;
+			children = (
+				8E8D04932D555A5900F5918E /* habit-tracker-hive */,
+				8E8D04A42D555A5E00F5918E /* habit-tracker-hiveTests */,
+				8E8D04AE2D555A5E00F5918E /* habit-tracker-hiveUITests */,
+				8E8D04922D555A5900F5918E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		8E8D04922D555A5900F5918E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8E8D04912D555A5900F5918E /* habit-tracker-hive.app */,
+				8E8D04A12D555A5E00F5918E /* habit-tracker-hiveTests.xctest */,
+				8E8D04AB2D555A5E00F5918E /* habit-tracker-hiveUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8E8D04932D555A5900F5918E /* habit-tracker-hive */ = {
+			isa = PBXGroup;
+			children = (
+				8E8D04942D555A5900F5918E /* habit_tracker_hiveApp.swift */,
+				8E8D04962D555A5900F5918E /* ContentView.swift */,
+				8E8D04982D555A5E00F5918E /* Assets.xcassets */,
+				8E8D049A2D555A5E00F5918E /* Preview Content */,
+			);
+			path = "habit-tracker-hive";
+			sourceTree = "<group>";
+		};
+		8E8D049A2D555A5E00F5918E /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				8E8D049B2D555A5E00F5918E /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		8E8D04A42D555A5E00F5918E /* habit-tracker-hiveTests */ = {
+			isa = PBXGroup;
+			children = (
+				8E8D04A52D555A5E00F5918E /* habit_tracker_hiveTests.swift */,
+			);
+			path = "habit-tracker-hiveTests";
+			sourceTree = "<group>";
+		};
+		8E8D04AE2D555A5E00F5918E /* habit-tracker-hiveUITests */ = {
+			isa = PBXGroup;
+			children = (
+				8E8D04AF2D555A5E00F5918E /* habit_tracker_hiveUITests.swift */,
+				8E8D04B12D555A5E00F5918E /* habit_tracker_hiveUITestsLaunchTests.swift */,
+			);
+			path = "habit-tracker-hiveUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8E8D04902D555A5900F5918E /* habit-tracker-hive */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8E8D04B52D555A5E00F5918E /* Build configuration list for PBXNativeTarget "habit-tracker-hive" */;
+			buildPhases = (
+				8E8D048D2D555A5900F5918E /* Sources */,
+				8E8D048E2D555A5900F5918E /* Frameworks */,
+				8E8D048F2D555A5900F5918E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "habit-tracker-hive";
+			productName = "habit-tracker-hive";
+			productReference = 8E8D04912D555A5900F5918E /* habit-tracker-hive.app */;
+			productType = "com.apple.product-type.application";
+		};
+		8E8D04A02D555A5E00F5918E /* habit-tracker-hiveTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8E8D04B82D555A5E00F5918E /* Build configuration list for PBXNativeTarget "habit-tracker-hiveTests" */;
+			buildPhases = (
+				8E8D049D2D555A5E00F5918E /* Sources */,
+				8E8D049E2D555A5E00F5918E /* Frameworks */,
+				8E8D049F2D555A5E00F5918E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8E8D04A32D555A5E00F5918E /* PBXTargetDependency */,
+			);
+			name = "habit-tracker-hiveTests";
+			productName = "habit-tracker-hiveTests";
+			productReference = 8E8D04A12D555A5E00F5918E /* habit-tracker-hiveTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		8E8D04AA2D555A5E00F5918E /* habit-tracker-hiveUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8E8D04BB2D555A5E00F5918E /* Build configuration list for PBXNativeTarget "habit-tracker-hiveUITests" */;
+			buildPhases = (
+				8E8D04A72D555A5E00F5918E /* Sources */,
+				8E8D04A82D555A5E00F5918E /* Frameworks */,
+				8E8D04A92D555A5E00F5918E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8E8D04AD2D555A5E00F5918E /* PBXTargetDependency */,
+			);
+			name = "habit-tracker-hiveUITests";
+			productName = "habit-tracker-hiveUITests";
+			productReference = 8E8D04AB2D555A5E00F5918E /* habit-tracker-hiveUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8E8D04892D555A5900F5918E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1530;
+				LastUpgradeCheck = 1530;
+				TargetAttributes = {
+					8E8D04902D555A5900F5918E = {
+						CreatedOnToolsVersion = 15.3;
+					};
+					8E8D04A02D555A5E00F5918E = {
+						CreatedOnToolsVersion = 15.3;
+						TestTargetID = 8E8D04902D555A5900F5918E;
+					};
+					8E8D04AA2D555A5E00F5918E = {
+						CreatedOnToolsVersion = 15.3;
+						TestTargetID = 8E8D04902D555A5900F5918E;
+					};
+				};
+			};
+			buildConfigurationList = 8E8D048C2D555A5900F5918E /* Build configuration list for PBXProject "habit-tracker-hive" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 8E8D04882D555A5900F5918E;
+			productRefGroup = 8E8D04922D555A5900F5918E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8E8D04902D555A5900F5918E /* habit-tracker-hive */,
+				8E8D04A02D555A5E00F5918E /* habit-tracker-hiveTests */,
+				8E8D04AA2D555A5E00F5918E /* habit-tracker-hiveUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8E8D048F2D555A5900F5918E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8E8D049C2D555A5E00F5918E /* Preview Assets.xcassets in Resources */,
+				8E8D04992D555A5E00F5918E /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8E8D049F2D555A5E00F5918E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8E8D04A92D555A5E00F5918E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8E8D048D2D555A5900F5918E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8E8D04972D555A5900F5918E /* ContentView.swift in Sources */,
+				8E8D04952D555A5900F5918E /* habit_tracker_hiveApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8E8D049D2D555A5E00F5918E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8E8D04A62D555A5E00F5918E /* habit_tracker_hiveTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8E8D04A72D555A5E00F5918E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8E8D04B22D555A5E00F5918E /* habit_tracker_hiveUITestsLaunchTests.swift in Sources */,
+				8E8D04B02D555A5E00F5918E /* habit_tracker_hiveUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		8E8D04A32D555A5E00F5918E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8E8D04902D555A5900F5918E /* habit-tracker-hive */;
+			targetProxy = 8E8D04A22D555A5E00F5918E /* PBXContainerItemProxy */;
+		};
+		8E8D04AD2D555A5E00F5918E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8E8D04902D555A5900F5918E /* habit-tracker-hive */;
+			targetProxy = 8E8D04AC2D555A5E00F5918E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		8E8D04B32D555A5E00F5918E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		8E8D04B42D555A5E00F5918E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8E8D04B62D555A5E00F5918E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"habit-tracker-hive/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hanyiye.habit-tracker-hive";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8E8D04B72D555A5E00F5918E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"habit-tracker-hive/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hanyiye.habit-tracker-hive";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		8E8D04B92D555A5E00F5918E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hanyiye.habit-tracker-hiveTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/habit-tracker-hive.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/habit-tracker-hive";
+			};
+			name = Debug;
+		};
+		8E8D04BA2D555A5E00F5918E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hanyiye.habit-tracker-hiveTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/habit-tracker-hive.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/habit-tracker-hive";
+			};
+			name = Release;
+		};
+		8E8D04BC2D555A5E00F5918E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hanyiye.habit-tracker-hiveUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "habit-tracker-hive";
+			};
+			name = Debug;
+		};
+		8E8D04BD2D555A5E00F5918E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hanyiye.habit-tracker-hiveUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "habit-tracker-hive";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8E8D048C2D555A5900F5918E /* Build configuration list for PBXProject "habit-tracker-hive" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8E8D04B32D555A5E00F5918E /* Debug */,
+				8E8D04B42D555A5E00F5918E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8E8D04B52D555A5E00F5918E /* Build configuration list for PBXNativeTarget "habit-tracker-hive" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8E8D04B62D555A5E00F5918E /* Debug */,
+				8E8D04B72D555A5E00F5918E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8E8D04B82D555A5E00F5918E /* Build configuration list for PBXNativeTarget "habit-tracker-hiveTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8E8D04B92D555A5E00F5918E /* Debug */,
+				8E8D04BA2D555A5E00F5918E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8E8D04BB2D555A5E00F5918E /* Build configuration list for PBXNativeTarget "habit-tracker-hiveUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8E8D04BC2D555A5E00F5918E /* Debug */,
+				8E8D04BD2D555A5E00F5918E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 8E8D04892D555A5900F5918E /* Project object */;
+}
