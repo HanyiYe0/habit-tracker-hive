@@ -15,33 +15,45 @@ struct ContentView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Background color or content
+                // Background color
                 Color.gray.opacity(0.1)
                     .edgesIgnoringSafeArea(.all)
                 
-                // Content that will be draggable
-                VStack {
-                    Text("Drag anywhere to move")
-                        .font(.headline)
-                    // Add more content here as needed
+                // Content container that moves opposite to drag direction
+                // to create the illusion of viewport movement
+                ZStack {
+                    // Example fixed content - add your content here
+                    ForEach(0..<5) { row in
+                        ForEach(0..<5) { column in
+                            Text("Item (\(row), \(column))")
+                                .padding()
+                                .background(Color.white)
+                                .cornerRadius(8)
+                                .shadow(radius: 2)
+                                .position(
+                                    x: CGFloat(column) * 200 + geometry.size.width/2,
+                                    y: CGFloat(row) * 200 + geometry.size.height/2
+                                )
+                        }
+                    }
                 }
                 .offset(offset)
-                .gesture(
-                    DragGesture()
-                        .onChanged { value in
-                            // Calculate new offset based on drag
-                            let newOffset = CGSize(
-                                width: lastDragPosition.width + value.translation.width,
-                                height: lastDragPosition.height + value.translation.height
-                            )
-                            offset = newOffset
-                        }
-                        .onEnded { value in
-                            // Store the final position
-                            lastDragPosition = offset
-                        }
-                )
             }
+            .contentShape(Rectangle()) // Makes entire area draggable
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        // Move viewport in the direction of drag
+                        let newOffset = CGSize(
+                            width: lastDragPosition.width + value.translation.width,
+                            height: lastDragPosition.height + value.translation.height
+                        )
+                        offset = newOffset
+                    }
+                    .onEnded { value in
+                        lastDragPosition = offset
+                    }
+            )
         }
     }
 }
