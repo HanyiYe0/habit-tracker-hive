@@ -225,7 +225,7 @@ struct HexagonHabit: View {
             }
         }
         .gesture(
-            LongPressGesture(minimumDuration: 0.1)  // Reduce duration for faster response
+            LongPressGesture(minimumDuration: 0.5)  // Reduce duration for faster response
                 .onEnded { _ in
                     if !animationInProgress {  // Prevent multiple animations
                         incrementCount()
