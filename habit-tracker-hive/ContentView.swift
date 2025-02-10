@@ -503,6 +503,11 @@ struct ContentView: View {
     @State private var isAddingHabit = false
     @State private var newHabitPosition: CGPoint = .zero
     
+    // Add computed property to check if view is moved
+    private var isViewMoved: Bool {
+        abs(offset.width) > 1 || abs(offset.height) > 1
+    }
+    
     var body: some View {
         GeometryReader { geometry in
             let centerPosition = CGPoint(
@@ -523,26 +528,29 @@ struct ContentView: View {
                 .offset(offset)
                 
                 // Reset position button in top right
-                VStack {
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
-                                offset = .zero
-                                lastDragPosition = .zero
+                if isViewMoved {
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                                    offset = .zero
+                                    lastDragPosition = .zero
+                                }
+                            }) {
+                                Image(systemName: "house.circle.fill")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.black)
+                                    .frame(width: 44, height: 44)
+                                    .background(Color.white)
+                                    .clipShape(Circle())
+                                    .shadow(radius: 2)
                             }
-                        }) {
-                            Image(systemName: "arrow.counterclockwise.circle.fill")
-                                .font(.system(size: 24))
-                                .foregroundColor(.black)
-                                .frame(width: 44, height: 44)
-                                .background(Color.white)
-                                .clipShape(Circle())
-                                .shadow(radius: 2)
+                            .padding()
+                            .transition(.opacity) // Add fade transition
                         }
-                        .padding()
+                        Spacer()
                     }
-                    Spacer()
                 }
                 
                 // Add habit button at bottom center
