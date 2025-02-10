@@ -522,25 +522,45 @@ struct ContentView: View {
                 }
                 .offset(offset)
                 
+                // Reset position button in top right
                 VStack {
-                    Spacer()
                     HStack {
                         Spacer()
                         Button(action: {
-                            // Use the pre-calculated center position
-                            newHabitPosition = centerPosition
-                            isAddingHabit = true
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                                offset = .zero
+                                lastDragPosition = .zero
+                            }
                         }) {
-                            Image(systemName: "plus")
-                                .font(.title2)
-                                .foregroundColor(.white)
-                                .frame(width: 60, height: 60)
-                                .background(Color.blue)
+                            Image(systemName: "arrow.counterclockwise.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.black)
+                                .frame(width: 44, height: 44)
+                                .background(Color.white)
                                 .clipShape(Circle())
-                                .shadow(radius: 4)
+                                .shadow(radius: 2)
                         }
                         .padding()
                     }
+                    Spacer()
+                }
+                
+                // Add habit button at bottom center
+                VStack {
+                    Spacer()
+                    Button(action: {
+                        newHabitPosition = centerPosition
+                        isAddingHabit = true
+                    }) {
+                        Image(systemName: "plus")
+                            .font(.title2)
+                            .foregroundColor(.white)
+                            .frame(width: 60, height: 60)
+                            .background(Color.black)
+                            .clipShape(Circle())
+                            .shadow(radius: 4)
+                    }
+                    .padding(.bottom, 30) // Add some padding from bottom
                 }
             }
             .contentShape(Rectangle())
@@ -561,7 +581,7 @@ struct ContentView: View {
                 AddHabitForm(
                     isPresented: $isAddingHabit,
                     habits: $habits,
-                    position: centerPosition // Pass the center position
+                    position: centerPosition
                 )
             }
         }
