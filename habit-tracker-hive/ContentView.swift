@@ -56,17 +56,16 @@ struct Habit: Identifiable {
     var priority: Priority
     var count: Int
     var target: Int
+    var isAnimating: Bool
     
     // Computed property for hexagon size based on priority
     var size: CGFloat {
-        switch priority {
-        case .high:
-            return 140
-        case .medium:
-            return 120
-        case .low:
-            return 100
+        let baseSize: CGFloat = switch priority {
+        case .high: 140
+        case .medium: 120
+        case .low: 100
         }
+        return isAnimating ? baseSize : 0
     }
 }
 
@@ -88,6 +87,7 @@ enum Priority: String, CaseIterable {
 // Hexagon habit view
 struct HexagonHabit: View {
     let habit: Habit
+    @State private var opacity: Double = 0
     
     var body: some View {
         VStack(spacing: 4) {
@@ -124,6 +124,12 @@ struct HexagonHabit: View {
             RegularPolygon(sides: 6)
                 .fill(habit.gradientStyle.gradient)
         )
+        .opacity(opacity)
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                opacity = 1
+            }
+        }
     }
 }
 
@@ -256,8 +262,9 @@ struct AddHabitForm: View {
                     isPresented = false
                 },
                 trailing: Button("Add") {
+                    let newPosition = calculateNextPosition()
                     let newHabit = Habit(
-                        position: calculateNextPosition(),
+                        position: newPosition,
                         title: title.isEmpty ? "New Habit" : title,
                         frequency: frequency,
                         gradientStyle: gradientStyle,
@@ -265,9 +272,19 @@ struct AddHabitForm: View {
                         description: description,
                         priority: priority,
                         count: count,
-                        target: target
+                        target: target,
+                        isAnimating: false // Start with no animation
                     )
-                    habits.append(newHabit)
+                    
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                        habits.append(newHabit)
+                        // Trigger the animation after a brief delay
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            if let index = habits.firstIndex(where: { $0.id == newHabit.id }) {
+                                habits[index].isAnimating = true
+                            }
+                        }
+                    }
                     isPresented = false
                 }
                 .disabled(title.isEmpty)
