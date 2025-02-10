@@ -259,50 +259,43 @@ struct AddHabitForm: View {
     // Helper function to calculate the next position in honeycomb layout
     private func calculateNextPosition() -> CGPoint {
         let size = CGFloat(120) // Base size for hexagon
-        let width = size * sqrt(3)
-        let height = size * 2
         
-        // Spacing between hexagons (slightly smaller than full width/height for tight packing)
-        let horizontalSpacing = width * 0.95
-        let verticalSpacing = height * 0.75
+        // Calculate spacing for tight hexagonal packing
+        let horizontalSpacing = size * 1.1  // Adjusted for tighter horizontal packing
+        let verticalSpacing = size * 0.95   // Adjusted for tighter vertical packing
         
-        // First habit goes in center
-        if habits.isEmpty {
+        // Define the exact grid coordinates matching the image pattern
+        let gridPositions: [(Double, Double)] = [
+            (0, 0),        // 1 (center)
+            (1, -1),       // 2
+            (2, -1),       // 3
+            (2, 0),        // 4
+            (1, 1),        // 5
+            (0, 1),        // 6
+            (-1, 0),       // 7
+            (-1, -1),      // 8
+            (3, -1),       // 9
+            (3, 0),        // 10
+            (3, 1),        // 11
+            (2, 2),        // 12
+            (1, 2),        // 13
+            (0, 2),        // 14
+            (-1, 2),       // 15
+            (-2, 1),       // 16
+            (-2, 0),       // 17
+            (-2, -1),      // 18
+            (-1, -2)       // 19
+        ]
+        
+        let index = habits.count
+        let (q, r) = gridPositions[min(index, gridPositions.count - 1)]
+        
+        // For the first habit, return exactly the center position
+        if index == 0 {
             return position
         }
         
-        // Define the hexagonal grid coordinates for the first two rings
-        let gridPositions: [(Double, Double)] = [
-            // Center
-            (0, 0),
-            
-            // First ring (6 positions)
-            (1, 0),    // Right
-            (0.5, -1), // Top right
-            (-0.5, -1),// Top left
-            (-1, 0),   // Left
-            (-0.5, 1), // Bottom left
-            (0.5, 1),  // Bottom right
-            
-            // Second ring (12 positions)
-            (2, 0),    // Far right
-            (1.5, -1), // Right top right
-            (1, -2),   // Right top
-            (0, -2),   // Top
-            (-1, -2),  // Left top
-            (-1.5, -1),// Left top left
-            (-2, 0),   // Far left
-            (-1.5, 1), // Left bottom left
-            (-1, 2),   // Left bottom
-            (0, 2),    // Bottom
-            (1, 2),    // Right bottom
-            (1.5, 1)   // Right bottom right
-        ]
-        
-        let index = min(habits.count, gridPositions.count - 1)
-        let (q, r) = gridPositions[index]
-        
-        // Convert axial coordinates to pixel coordinates
+        // For subsequent habits, calculate position relative to center
         let x = position.x + horizontalSpacing * CGFloat(q)
         let y = position.y + verticalSpacing * CGFloat(r)
         
@@ -311,7 +304,6 @@ struct AddHabitForm: View {
 }
 
 struct ContentView: View {
-    // State variables to track offset
     @State private var offset: CGSize = .zero
     @State private var lastDragPosition: CGSize = .zero
     @State private var habits: [Habit] = []
@@ -320,14 +312,16 @@ struct ContentView: View {
     
     var body: some View {
         GeometryReader { geometry in
+            let centerPosition = CGPoint(
+                x: geometry.size.width/2,
+                y: geometry.size.height/2
+            )
+            
             ZStack {
-                // Background color
                 Color.gray.opacity(0.1)
                     .edgesIgnoringSafeArea(.all)
                 
-                // Content container
                 ZStack {
-                    // Existing habits
                     ForEach(habits) { habit in
                         HexagonHabit(habit: habit)
                             .position(x: habit.position.x, y: habit.position.y)
@@ -335,16 +329,13 @@ struct ContentView: View {
                 }
                 .offset(offset)
                 
-                // Add button (FAB)
                 VStack {
                     Spacer()
                     HStack {
                         Spacer()
                         Button(action: {
-                            // Calculate position for new habit
-                            let centerX = geometry.size.width/2 - offset.width
-                            let centerY = geometry.size.height/2 - offset.height
-                            newHabitPosition = CGPoint(x: centerX, y: centerY)
+                            // Use the pre-calculated center position
+                            newHabitPosition = centerPosition
                             isAddingHabit = true
                         }) {
                             Image(systemName: "plus")
@@ -359,11 +350,10 @@ struct ContentView: View {
                     }
                 }
             }
-            .contentShape(Rectangle()) // Makes entire area draggable
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture()
                     .onChanged { value in
-                        // Move viewport in the direction of drag
                         let newOffset = CGSize(
                             width: lastDragPosition.width + value.translation.width,
                             height: lastDragPosition.height + value.translation.height
@@ -378,7 +368,7 @@ struct ContentView: View {
                 AddHabitForm(
                     isPresented: $isAddingHabit,
                     habits: $habits,
-                    position: newHabitPosition
+                    position: centerPosition // Pass the center position
                 )
             }
         }
