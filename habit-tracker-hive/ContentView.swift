@@ -12,19 +12,20 @@ enum GradientStyle {
     case blue
     case red
     case green
-    case purple
+    case light_pink
     case orange
     case yellow
     case pink
     case teal
+    case grey
     
     var gradient: LinearGradient {
         switch self {
         case .blue:
             return LinearGradient(
                 colors: [
-                    Color(hex: "1e3c72"),
-                    Color(hex: "2a5298")
+                    Color(hex: "a1c4fd"),
+                    Color(hex: "c2e9fb")
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -32,8 +33,8 @@ enum GradientStyle {
         case .red:
             return LinearGradient(
                 colors: [
-                    Color(hex: "e52d27"),
-                    Color(hex: "b31217")
+                    Color(hex: "ff9a9e"),
+                    Color(hex: "fecfef")
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -41,17 +42,17 @@ enum GradientStyle {
         case .green:
             return LinearGradient(
                 colors: [
-                    Color(hex: "56ab2f"),
-                    Color(hex: "a8e063")
+                    Color(hex: "dcedc8"),
+                    Color(hex: "f1f8e9")
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
-        case .purple:
+        case .light_pink:
             return LinearGradient(
                 colors: [
-                    Color(hex: "41295a"),
-                    Color(hex: "2f0743")
+                    Color(hex: "e0c3fc"),
+                    Color(hex: "f9e6ff")
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -59,8 +60,8 @@ enum GradientStyle {
         case .orange:
             return LinearGradient(
                 colors: [
-                    Color(hex: "ff8008"),
-                    Color(hex: "ffc837")
+                    Color(hex: "ffe0b2"),
+                    Color(hex: "ffcc80")
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -68,8 +69,8 @@ enum GradientStyle {
         case .yellow:
             return LinearGradient(
                 colors: [
-                    Color(hex: "f7971e"),
-                    Color(hex: "ffd200")
+                    Color(hex: "fffde7"),
+                    Color(hex: "fff9c4")
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -77,8 +78,8 @@ enum GradientStyle {
         case .pink:
             return LinearGradient(
                 colors: [
-                    Color(hex: "dd5e89"),
-                    Color(hex: "f7bb97")
+                    Color(hex: "ffc1e3"),
+                    Color(hex: "ffe6f0")
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -86,14 +87,23 @@ enum GradientStyle {
         case .teal:
             return LinearGradient(
                 colors: [
-                    Color(hex: "11998e"),
-                    Color(hex: "38ef7d")
+                    Color(hex: "b2dfdb"),
+                    Color(hex: "e0f2f1")
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
-        }
-    }
+        case .grey:
+            return LinearGradient(
+                colors: [
+                    Color(hex: "f0f0f0"),
+                    Color(hex: "d9d9d9")
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        }  
+    }     
 }
 
 // Add Color extension to support hex colors
@@ -130,7 +140,6 @@ struct Habit: Identifiable {
     var title: String
     var frequency: Frequency
     var gradientStyle: GradientStyle
-    var startDate: Date
     var description: String
     var priority: Priority
     var count: Int
@@ -281,15 +290,11 @@ struct AddHabitForm: View {
     
     @State private var title = ""
     @State private var frequency: Frequency = .daily
-    @State private var selectedColor: Color = .blue
-    @State private var startDate = Date()
     @State private var description = ""
     @State private var priority: Priority = .medium
     @State private var count: Int = 0
     @State private var target: Int = 0
-    @State private var gradientStyle: GradientStyle = .orange
-    
-    let colors: [Color] = [.blue, .purple, .green, .orange, .pink, .teal]
+    @State private var gradientStyle: GradientStyle = .blue
     
     var body: some View {
         NavigationView {
@@ -308,53 +313,21 @@ struct AddHabitForm: View {
                             Text(frequency.rawValue)
                         }
                     }
-                    
-                    DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
                 }
                 
                 Section(header: Text("Appearance")) {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack {
-                            ForEach(colors, id: \.self) { color in
-                                Circle()
-                                    .fill(color)
-                                    .frame(width: 30, height: 30)
-                                    .overlay(
-                                        Circle()
-                                            .stroke(selectedColor == color ? Color.black : Color.clear, lineWidth: 2)
-                                    )
-                                    .onTapGesture {
-                                        selectedColor = color
-                                    }
-                                    .padding(.horizontal, 5)
-                            }
-                        }
-                    }
-                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
-                }
-                
-                Section(header: Text("Additional Details")) {
-                    TextEditor(text: $description)
-                        .frame(height: 100)
-                }
-                
-                Section(header: Text("Progress")) {
-                    Stepper("Current Count: \(count)", value: $count)
-                    Stepper("Target: \(target)", value: $target)
-                }
-                
-                Section(header: Text("Style")) {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             ForEach([
                                 GradientStyle.blue,
                                 GradientStyle.red,
                                 GradientStyle.green,
-                                GradientStyle.purple,
+                                GradientStyle.light_pink,
                                 GradientStyle.orange,
                                 GradientStyle.yellow,
                                 GradientStyle.pink,
-                                GradientStyle.teal
+                                GradientStyle.teal,
+                                GradientStyle.grey
                             ], id: \.self) { style in
                                 GradientPreview(
                                     gradientStyle: style,
@@ -369,6 +342,16 @@ struct AddHabitForm: View {
                     }
                     .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
                 }
+                
+                Section(header: Text("Additional Details")) {
+                    TextEditor(text: $description)
+                        .frame(height: 100)
+                }
+                
+                Section(header: Text("Progress")) {
+                    Stepper("Current Count: \(count)", value: $count)
+                    Stepper("Target: \(target)", value: $target)
+                }
             }
             .navigationTitle("New Habit")
             .navigationBarItems(
@@ -382,17 +365,15 @@ struct AddHabitForm: View {
                         title: title.isEmpty ? "New Habit" : title,
                         frequency: frequency,
                         gradientStyle: gradientStyle,
-                        startDate: startDate,
                         description: description,
                         priority: priority,
                         count: count,
                         target: target,
-                        isAnimating: false // Start with no animation
+                        isAnimating: false
                     )
                     
                     withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                         habits.append(newHabit)
-                        // Trigger the animation after a brief delay
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                             if let index = habits.firstIndex(where: { $0.id == newHabit.id }) {
                                 habits[index].isAnimating = true
