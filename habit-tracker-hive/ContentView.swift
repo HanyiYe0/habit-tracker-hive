@@ -176,8 +176,9 @@ enum Priority: String, CaseIterable {
 struct HexagonHabit: View {
     @Binding var habit: Habit
     @State private var opacity: Double = 0
-    @State private var isPressed: Bool = false
     @State private var scale: CGFloat = 1.0
+    @State private var rotation: Double = 0.0  // Add rotation state
+    @State private var animationInProgress = false  // Track animation state
     
     var body: some View {
         VStack(spacing: 4) {
@@ -213,8 +214,10 @@ struct HexagonHabit: View {
         .background(
             RegularPolygon(sides: 6)
                 .fill(habit.gradientStyle.gradient)
+                .shadow(color: .black.opacity(0.2), radius: 5)
         )
         .scaleEffect(scale)
+        .rotationEffect(.degrees(rotation))  // Add rotation effect
         .opacity(opacity)
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
@@ -222,29 +225,50 @@ struct HexagonHabit: View {
             }
         }
         .gesture(
-            LongPressGesture(minimumDuration: 0.3)
+            LongPressGesture(minimumDuration: 0.1)  // Reduce duration for faster response
                 .onEnded { _ in
-                    incrementCount()
+                    if !animationInProgress {  // Prevent multiple animations
+                        incrementCount()
+                    }
                 }
         )
     }
     
     private func incrementCount() {
+        animationInProgress = true
+        
         // Haptic feedback
-        let impactGenerator = UIImpactFeedbackGenerator(style: .medium)
+        let impactGenerator = UIImpactFeedbackGenerator(style: .heavy)
         impactGenerator.impactOccurred()
         
-        // Visual feedback
-        withAnimation(.spring(response: 0.2, dampingFraction: 0.4)) {
-            scale = 1.1
+        // First phase: Scale up and rotate
+        withAnimation(.easeIn(duration: 0.15)) {
+            scale = 1.4
+            rotation = 15
         }
         
-        // Increment count
-        habit.count += 1
-        
-        // Reset scale
-        withAnimation(.spring(response: 0.2, dampingFraction: 0.4).delay(0.1)) {
-            scale = 1.0
+        // Second phase: Increment count and start settling
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            habit.count += 1
+            
+            // Scale down and rotate back
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                scale = 0.8
+                rotation = -5
+            }
+            
+            // Final phase: Return to normal
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                    scale = 1.0
+                    rotation = 0
+                }
+                
+                // Reset animation flag
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    animationInProgress = false
+                }
+            }
         }
     }
 }
