@@ -277,13 +277,14 @@ struct AddHabitForm: View {
     
     // Update the calculateNextPosition function in AddHabitForm
     private func calculateNextPosition() -> CGPoint {
-        let size = CGFloat(120) // Base size for hexagon
+        let baseSize = CGFloat(120) // Base size for hexagon
+        let maxSize = CGFloat(140)  // Size of largest possible hexagon (high priority)
         
-        // Calculate spacing for flat-edged alignment
-        let width = size * sqrt(3)  // Width is now height * √3 for flat edges
-        let height = size * 2
-        let horizontalSpacing = width * 0.95  // Slight gap between hexagons
-        let verticalSpacing = height * 0.75   // Adjusted for flat edge alignment
+        // Calculate spacing based on maximum hexagon size to prevent overlaps
+        let width = maxSize * sqrt(3)  // Width for flat edges
+        let height = maxSize * 2
+        let horizontalSpacing = width * 0.52  // Further reduced horizontal gap
+        let verticalSpacing = height * 0.45   // Further reduced vertical spacing
         
         // First habit goes in center
         if habits.isEmpty {
