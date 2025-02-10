@@ -277,52 +277,57 @@ struct AddHabitForm: View {
     
     // Update the calculateNextPosition function in AddHabitForm
     private func calculateNextPosition() -> CGPoint {
-        let baseSize = CGFloat(120) // Base size for hexagon
-        let maxSize = CGFloat(140)  // Size of largest possible hexagon (high priority)
+        let baseSize = CGFloat(120)
+        let maxSize = CGFloat(140)
         
-        // Calculate spacing based on maximum hexagon size to prevent overlaps
-        let width = maxSize * sqrt(3)  // Width for flat edges
+        // Calculate spacing based on maximum hexagon size
+        let width = maxSize * sqrt(3)
         let height = maxSize * 2
-        let horizontalSpacing = width * 0.52  // Further reduced horizontal gap
-        let verticalSpacing = height * 0.45   // Further reduced vertical spacing
+        let horizontalSpacing = width * 0.52
+        let verticalSpacing = height * 0.45
         
         // First habit goes in center
         if habits.isEmpty {
             return position
         }
         
-        // Define grid positions for flat-edged hexagons
-        let gridPositions: [(Double, Double)] = [
-            (0, 0),      // Center (A)
-            (1, 0),      // Right (B)
-            (0.5, -1),   // Top Right (C)
-            (-0.5, -1),  // Top Left (D)
-            (-1, 0),     // Left (E)
-            (-0.5, 1),   // Bottom Left (F)
-            (0.5, 1),    // Bottom Right (G)
-            // Second ring positions
-            (1.5, -1),
-            (2, 0),
-            (1.5, 1),
-            (0, 2),
-            (-1.5, 1),
-            (-2, 0),
-            (-1.5, -1),
-            (0, -2)
-        ]
-        
-        // Get next available position
-        let index = habits.count
-        if index < gridPositions.count {
-            let (q, r) = gridPositions[index]
-            
-            // Convert coordinates to pixel positions
-            let x = position.x + (horizontalSpacing * CGFloat(q))
-            let y = position.y + (verticalSpacing * CGFloat(r))
-            
-            return CGPoint(x: x, y: y)
+        // Function to calculate distance between two points
+        func distance(_ p1: CGPoint, _ p2: CGPoint) -> CGFloat {
+            let dx = p1.x - p2.x
+            let dy = p1.y - p2.y
+            return sqrt(dx * dx + dy * dy)
         }
         
+        // Function to check if position is occupied
+        func isPositionOccupied(_ pos: CGPoint) -> Bool {
+            let minDistance = maxSize * 0.9 // Minimum distance between hexagon centers
+            return habits.contains { habit in
+                distance(habit.position, pos) < minDistance
+            }
+        }
+        
+        // Calculate positions in expanding rings
+        var ring = 1
+        while ring < 100 { // Reasonable limit to prevent infinite loops
+            // For each ring, calculate 6 * ring positions
+            for i in 0..<(6 * ring) {
+                let angle = Double(i) * (Double.pi / 3) / Double(ring)
+                let ringRadius = Double(ring) * Double(horizontalSpacing)
+                
+                // Calculate position in current ring
+                let x = position.x + CGFloat(cos(angle) * ringRadius)
+                let y = position.y + CGFloat(sin(angle) * ringRadius)
+                let newPosition = CGPoint(x: x, y: y)
+                
+                // If position is not occupied, use it
+                if !isPositionOccupied(newPosition) {
+                    return newPosition
+                }
+            }
+            ring += 1
+        }
+        
+        // Fallback position (shouldn't reach here)
         return position
     }
 }
