@@ -174,8 +174,10 @@ enum Priority: String, CaseIterable {
 
 // Hexagon habit view
 struct HexagonHabit: View {
-    let habit: Habit
+    @Binding var habit: Habit
     @State private var opacity: Double = 0
+    @State private var isPressed: Bool = false
+    @State private var scale: CGFloat = 1.0
     
     var body: some View {
         VStack(spacing: 4) {
@@ -212,11 +214,37 @@ struct HexagonHabit: View {
             RegularPolygon(sides: 6)
                 .fill(habit.gradientStyle.gradient)
         )
+        .scaleEffect(scale)
         .opacity(opacity)
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                 opacity = 1
             }
+        }
+        .gesture(
+            LongPressGesture(minimumDuration: 0.3)
+                .onEnded { _ in
+                    incrementCount()
+                }
+        )
+    }
+    
+    private func incrementCount() {
+        // Haptic feedback
+        let impactGenerator = UIImpactFeedbackGenerator(style: .medium)
+        impactGenerator.impactOccurred()
+        
+        // Visual feedback
+        withAnimation(.spring(response: 0.2, dampingFraction: 0.4)) {
+            scale = 1.1
+        }
+        
+        // Increment count
+        habit.count += 1
+        
+        // Reset scale
+        withAnimation(.spring(response: 0.2, dampingFraction: 0.4).delay(0.1)) {
+            scale = 1.0
         }
     }
 }
@@ -463,8 +491,8 @@ struct ContentView: View {
                     .edgesIgnoringSafeArea(.all)
                 
                 ZStack {
-                    ForEach(habits) { habit in
-                        HexagonHabit(habit: habit)
+                    ForEach($habits) { $habit in
+                        HexagonHabit(habit: $habit)
                             .position(x: habit.position.x, y: habit.position.y)
                     }
                 }
