@@ -152,6 +152,24 @@ struct RegularPolygon: Shape {
     }
 }
 
+// Add this helper struct for hex coordinates
+struct HexCoord {
+    let q: Int // x-axis
+    let r: Int // y-axis
+    
+    // Get the 6 neighboring coordinates in clockwise order
+    func neighbors() -> [HexCoord] {
+        [
+            HexCoord(q: q+1, r: r),     // right
+            HexCoord(q: q+1, r: r-1),   // top right
+            HexCoord(q: q, r: r-1),     // top left
+            HexCoord(q: q-1, r: r),     // left
+            HexCoord(q: q-1, r: r+1),   // bottom left
+            HexCoord(q: q, r: r+1)      // bottom right
+        ]
+    }
+}
+
 // Form view for adding new habits
 struct AddHabitForm: View {
     @Binding var isPresented: Bool
@@ -256,50 +274,63 @@ struct AddHabitForm: View {
         }
     }
     
-    // Helper function to calculate the next position in honeycomb layout
+    // Update the calculateNextPosition function in AddHabitForm
     private func calculateNextPosition() -> CGPoint {
         let size = CGFloat(120) // Base size for hexagon
+        let horizontalSpacing = size * 1.1
+        let verticalSpacing = size * 0.95
         
-        // Calculate spacing for tight hexagonal packing
-        let horizontalSpacing = size * 1.1  // Adjusted for tighter horizontal packing
-        let verticalSpacing = size * 0.95   // Adjusted for tighter vertical packing
-        
-        // Define the exact grid coordinates matching the image pattern
-        let gridPositions: [(Double, Double)] = [
-            (0, 0),        // 1 (center)
-            (1, -1),       // 2
-            (2, -1),       // 3
-            (2, 0),        // 4
-            (1, 1),        // 5
-            (0, 1),        // 6
-            (-1, 0),       // 7
-            (-1, -1),      // 8
-            (3, -1),       // 9
-            (3, 0),        // 10
-            (3, 1),        // 11
-            (2, 2),        // 12
-            (1, 2),        // 13
-            (0, 2),        // 14
-            (-1, 2),       // 15
-            (-2, 1),       // 16
-            (-2, 0),       // 17
-            (-2, -1),      // 18
-            (-1, -2)       // 19
-        ]
-        
-        let index = habits.count
-        let (q, r) = gridPositions[min(index, gridPositions.count - 1)]
-        
-        // For the first habit, return exactly the center position
-        if index == 0 {
+        // First habit goes in center
+        if habits.isEmpty {
             return position
         }
         
-        // For subsequent habits, calculate position relative to center
-        let x = position.x + horizontalSpacing * CGFloat(q)
-        let y = position.y + verticalSpacing * CGFloat(r)
+        // Keep track of occupied positions
+        var occupiedPositions = Set<String>()
+        for habit in habits {
+            // Convert actual positions back to hex coordinates
+            let q = Int(round((habit.position.x - position.x) / horizontalSpacing))
+            let r = Int(round((habit.position.y - position.y) / verticalSpacing))
+            occupiedPositions.insert("\(q),\(r)")
+        }
         
-        return CGPoint(x: x, y: y)
+        // Start from center and spiral outward
+        var spiral: [HexCoord] = [HexCoord(q: 0, r: 0)]
+        var currentRing = 1
+        
+        while currentRing < 5 { // Limit to 5 rings
+            let startCoord = HexCoord(q: currentRing, r: 0)
+            var ringCoords = [startCoord]
+            
+            // For each ring, walk around all 6 sides
+            for direction in 0..<6 {
+                let steps = currentRing
+                var current = ringCoords.last!
+                
+                for _ in 0..<steps {
+                    let neighbors = current.neighbors()
+                    current = neighbors[(direction + 4) % 6] // Move to next position in ring
+                    ringCoords.append(current)
+                }
+            }
+            
+            spiral.append(contentsOf: ringCoords)
+            currentRing += 1
+        }
+        
+        // Find first unoccupied position
+        for coord in spiral {
+            let key = "\(coord.q),\(coord.r)"
+            if !occupiedPositions.contains(key) {
+                // Convert hex coordinates to screen position
+                let x = position.x + horizontalSpacing * CGFloat(coord.q)
+                let y = position.y + verticalSpacing * CGFloat(coord.r)
+                return CGPoint(x: x, y: y)
+            }
+        }
+        
+        // Fallback position (shouldn't reach here with reasonable number of habits)
+        return position
     }
 }
 
