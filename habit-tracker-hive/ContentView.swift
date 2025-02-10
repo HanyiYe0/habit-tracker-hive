@@ -137,7 +137,8 @@ struct RegularPolygon: Shape {
         
         var path = Path()
         for i in 0..<sides {
-            let angle = (Double(i) * (360.0 / Double(sides))) * Double.pi / 180
+            // Start at 30 degrees (π/6) to align flat edge on top
+            let angle = (Double(i) * (360.0 / Double(sides)) + 30) * Double.pi / 180
             let x = center.x + CGFloat(cos(angle)) * radius
             let y = center.y + CGFloat(sin(angle)) * radius
             
@@ -277,59 +278,50 @@ struct AddHabitForm: View {
     // Update the calculateNextPosition function in AddHabitForm
     private func calculateNextPosition() -> CGPoint {
         let size = CGFloat(120) // Base size for hexagon
-        let horizontalSpacing = size * 1.1
-        let verticalSpacing = size * 0.95
+        
+        // Calculate spacing for flat-edged alignment
+        let width = size * sqrt(3)  // Width is now height * √3 for flat edges
+        let height = size * 2
+        let horizontalSpacing = width * 0.95  // Slight gap between hexagons
+        let verticalSpacing = height * 0.75   // Adjusted for flat edge alignment
         
         // First habit goes in center
         if habits.isEmpty {
             return position
         }
         
-        // Keep track of occupied positions
-        var occupiedPositions = Set<String>()
-        for habit in habits {
-            // Convert actual positions back to hex coordinates
-            let q = Int(round((habit.position.x - position.x) / horizontalSpacing))
-            let r = Int(round((habit.position.y - position.y) / verticalSpacing))
-            occupiedPositions.insert("\(q),\(r)")
-        }
+        // Define grid positions for flat-edged hexagons
+        let gridPositions: [(Double, Double)] = [
+            (0, 0),      // Center (A)
+            (1, 0),      // Right (B)
+            (0.5, -1),   // Top Right (C)
+            (-0.5, -1),  // Top Left (D)
+            (-1, 0),     // Left (E)
+            (-0.5, 1),   // Bottom Left (F)
+            (0.5, 1),    // Bottom Right (G)
+            // Second ring positions
+            (1.5, -1),
+            (2, 0),
+            (1.5, 1),
+            (0, 2),
+            (-1.5, 1),
+            (-2, 0),
+            (-1.5, -1),
+            (0, -2)
+        ]
         
-        // Start from center and spiral outward
-        var spiral: [HexCoord] = [HexCoord(q: 0, r: 0)]
-        var currentRing = 1
-        
-        while currentRing < 5 { // Limit to 5 rings
-            let startCoord = HexCoord(q: currentRing, r: 0)
-            var ringCoords = [startCoord]
+        // Get next available position
+        let index = habits.count
+        if index < gridPositions.count {
+            let (q, r) = gridPositions[index]
             
-            // For each ring, walk around all 6 sides
-            for direction in 0..<6 {
-                let steps = currentRing
-                var current = ringCoords.last!
-                
-                for _ in 0..<steps {
-                    let neighbors = current.neighbors()
-                    current = neighbors[(direction + 4) % 6] // Move to next position in ring
-                    ringCoords.append(current)
-                }
-            }
+            // Convert coordinates to pixel positions
+            let x = position.x + (horizontalSpacing * CGFloat(q))
+            let y = position.y + (verticalSpacing * CGFloat(r))
             
-            spiral.append(contentsOf: ringCoords)
-            currentRing += 1
+            return CGPoint(x: x, y: y)
         }
         
-        // Find first unoccupied position
-        for coord in spiral {
-            let key = "\(coord.q),\(coord.r)"
-            if !occupiedPositions.contains(key) {
-                // Convert hex coordinates to screen position
-                let x = position.x + horizontalSpacing * CGFloat(coord.q)
-                let y = position.y + verticalSpacing * CGFloat(coord.r)
-                return CGPoint(x: x, y: y)
-            }
-        }
-        
-        // Fallback position (shouldn't reach here with reasonable number of habits)
         return position
     }
 }
