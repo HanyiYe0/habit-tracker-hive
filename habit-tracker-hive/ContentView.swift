@@ -143,15 +143,14 @@ struct Habit: Identifiable {
     var description: String
     var priority: Priority
     var count: Int
-    var target: Int
     var isAnimating: Bool
     
     // Computed property for hexagon size based on priority
     var size: CGFloat {
         let baseSize: CGFloat = switch priority {
-        case .high: 140
-        case .medium: 120
-        case .low: 100
+        case .high: 180
+        case .medium: 160
+        case .low: 140
         }
         return isAnimating ? baseSize : 0
     }
@@ -181,34 +180,21 @@ struct HexagonHabit: View {
     @State private var animationInProgress = false  // Track animation state
     
     var body: some View {
-        VStack(spacing: 4) {
-            if let checkmark = habit.count >= habit.target ? Image(systemName: "checkmark") : nil {
-                HStack {
-                    checkmark
-                        .font(.system(size: habit.size * 0.15))
-                    Text("\(habit.count)")
-                        .font(.system(size: habit.size * 0.2, weight: .bold))
-                }
+        VStack(spacing: 0) {
+            Text("\(habit.count)")
+                .font(.system(size: 25, weight: .bold))
                 .foregroundColor(.black)
-            } else {
-                Text("\(habit.count)")
-                    .font(.system(size: habit.size * 0.25, weight: .bold))
-                    .foregroundColor(.black)
-            }
+                .offset(y: -10)
             
             Text(habit.title)
-                .font(.system(size: habit.size * 0.12))
+                .font(.system(size: 17))
                 .foregroundColor(.black.opacity(0.6))
+                .offset(y: -10)
             
             Text(habit.frequency.rawValue.lowercased())
-                .font(.system(size: habit.size * 0.1))
+                .font(.system(size: 15))
                 .foregroundColor(.black.opacity(0.4))
-            
-            if habit.target > 0 {
-                Text("\(habit.target)○")
-                    .font(.system(size: habit.size * 0.12))
-                    .foregroundColor(.black.opacity(0.4))
-            }
+                .offset(y: -10)
         }
         .frame(width: habit.size, height: habit.size)
         .background(
@@ -345,7 +331,6 @@ struct AddHabitForm: View {
     @State private var description = ""
     @State private var priority: Priority = .medium
     @State private var count: Int = 0
-    @State private var target: Int = 0
     @State private var gradientStyle: GradientStyle = .blue
     
     var body: some View {
@@ -395,14 +380,8 @@ struct AddHabitForm: View {
                     .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
                 }
                 
-                Section(header: Text("Additional Details")) {
-                    TextEditor(text: $description)
-                        .frame(height: 100)
-                }
-                
                 Section(header: Text("Progress")) {
                     Stepper("Current Count: \(count)", value: $count)
-                    Stepper("Target: \(target)", value: $target)
                 }
             }
             .navigationTitle("New Habit")
@@ -420,7 +399,6 @@ struct AddHabitForm: View {
                         description: description,
                         priority: priority,
                         count: count,
-                        target: target,
                         isAnimating: false
                     )
                     
@@ -441,14 +419,12 @@ struct AddHabitForm: View {
     
     // Update the calculateNextPosition function in AddHabitForm
     private func calculateNextPosition() -> CGPoint {
-        let baseSize = CGFloat(120)
-        let maxSize = CGFloat(140)
+        let maxSize = CGFloat(180)
         
         // Calculate spacing based on maximum hexagon size
         let width = maxSize * sqrt(3)
         let height = maxSize * 2
-        let horizontalSpacing = width * 0.52
-        let verticalSpacing = height * 0.45
+        let horizontalSpacing = width * 0.58
         
         // First habit goes in center
         if habits.isEmpty {
@@ -464,7 +440,7 @@ struct AddHabitForm: View {
         
         // Function to check if position is occupied
         func isPositionOccupied(_ pos: CGPoint) -> Bool {
-            let minDistance = maxSize * 0.9 // Minimum distance between hexagon centers
+            let minDistance = maxSize * 1.0
             return habits.contains { habit in
                 distance(habit.position, pos) < minDistance
             }
@@ -472,18 +448,15 @@ struct AddHabitForm: View {
         
         // Calculate positions in expanding rings
         var ring = 1
-        while ring < 100 { // Reasonable limit to prevent infinite loops
-            // For each ring, calculate 6 * ring positions
+        while ring < 100 {
             for i in 0..<(6 * ring) {
                 let angle = Double(i) * (Double.pi / 3) / Double(ring)
                 let ringRadius = Double(ring) * Double(horizontalSpacing)
                 
-                // Calculate position in current ring
                 let x = position.x + CGFloat(cos(angle) * ringRadius)
                 let y = position.y + CGFloat(sin(angle) * ringRadius)
                 let newPosition = CGPoint(x: x, y: y)
                 
-                // If position is not occupied, use it
                 if !isPositionOccupied(newPosition) {
                     return newPosition
                 }
@@ -491,7 +464,6 @@ struct AddHabitForm: View {
             ring += 1
         }
         
-        // Fallback position (shouldn't reach here)
         return position
     }
 }
