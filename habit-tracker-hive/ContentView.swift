@@ -133,6 +133,13 @@ extension Color {
     }
 }
 
+// Add Comment struct
+struct Comment: Identifiable {
+    let id = UUID()
+    let text: String
+    let date: Date
+}
+
 // Habit structure to store habit data
 struct Habit: Identifiable {
     let id = UUID()
@@ -144,6 +151,7 @@ struct Habit: Identifiable {
     var priority: Priority
     var count: Int
     var isAnimating: Bool
+    var comments: [Comment] = []  // Add comments array
     
     // Computed property for hexagon size based on priority
     var size: CGFloat {
@@ -178,23 +186,35 @@ struct HexagonHabit: View {
     @State private var scale: CGFloat = 1.0
     @State private var rotation: Double = 0.0  // Add rotation state
     @State private var animationInProgress = false  // Track animation state
+    @State private var showingComments = false
     
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 2) {
             Text("\(habit.count)")
                 .font(.system(size: 25, weight: .bold))
                 .foregroundColor(.black)
-                .offset(y: -10)
             
             Text(habit.title)
                 .font(.system(size: 17))
                 .foregroundColor(.black.opacity(0.6))
-                .offset(y: -10)
             
             Text(habit.frequency.rawValue.lowercased())
                 .font(.system(size: 15))
                 .foregroundColor(.black.opacity(0.4))
-                .offset(y: -10)
+            
+            // Add comment button
+            Button(action: {
+                showingComments = true
+            }) {
+                VStack(spacing: 2) {
+                    Image(systemName: "bubble.left")
+                        .font(.system(size: 14))
+                    Text("\(habit.comments.count)")
+                        .font(.system(size: 12))
+                }
+                .foregroundColor(.black.opacity(0.4))
+            }
+            .offset(y: 5)
         }
         .frame(width: habit.size, height: habit.size)
         .background(
@@ -218,6 +238,9 @@ struct HexagonHabit: View {
                     }
                 }
         )
+        .sheet(isPresented: $showingComments) {
+            CommentSheet(habit: $habit)
+        }
     }
     
     private func incrementCount() {
@@ -465,6 +488,59 @@ struct AddHabitForm: View {
         }
         
         return position
+    }
+}
+
+// Add CommentSheet view for displaying and adding comments
+struct CommentSheet: View {
+    @Binding var habit: Habit
+    @Environment(\.dismiss) var dismiss
+    @State private var newComment: String = ""
+    
+    var body: some View {
+        NavigationView {
+            VStack {
+                List {
+                    ForEach(habit.comments) { comment in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(comment.text)
+                                .foregroundColor(.black)
+                            Text(comment.date.formatted())
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+                
+                HStack {
+                    TextField("Add a comment", text: $newComment)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                    
+                    Button(action: {
+                        if !newComment.isEmpty {
+                            habit.comments.append(Comment(text: newComment, date: Date()))
+                            newComment = ""
+                        }
+                    }) {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .foregroundColor(.black)
+                            .font(.title2)
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Comments")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }
 
