@@ -33,8 +33,8 @@ enum GradientStyle {
         case .red:
             return LinearGradient(
                 colors: [
-                    Color(hex: "ff9a9e"),
-                    Color(hex: "fecfef")
+                    Color(hex: "ff6b6b"),
+                    Color(hex: "ffa5a5")
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -211,16 +211,91 @@ struct HexagonHabit: View {
     
     private let longPressThreshold: TimeInterval = 1.0
     
-    // Add computed property for outline gradient
+    // Update the outline gradient based on the habit's gradient style
     private var outlineGradient: LinearGradient {
-        LinearGradient(
-            gradient: Gradient(colors: [
-                Color.white.opacity(0.8),
-                Color("AccentColor").opacity(0.5) // Use a defined accent color
-            ]),
-            startPoint: .top,
-            endPoint: .bottom
-        )
+        switch habit.gradientStyle {
+        case .blue:
+            return LinearGradient(
+                colors: [
+                    Color(hex: "1e3c72").opacity(0.5),
+                    Color(hex: "a1c4fd").opacity(0.8)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        case .red:
+            return LinearGradient(
+                colors: [
+                    Color(hex: "ff4040").opacity(0.8),
+                    Color(hex: "ff8080").opacity(0.5)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        case .green:
+            return LinearGradient(
+                colors: [
+                    Color(hex: "56ab2f").opacity(0.5),
+                    Color(hex: "a8e063").opacity(0.8)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        case .light_pink:
+            return LinearGradient(
+                colors: [
+                    Color(hex: "e0c3fc").opacity(0.8),
+                    Color(hex: "dd5e89").opacity(0.5)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        case .orange:
+            return LinearGradient(
+                colors: [
+                    Color(hex: "ff8008").opacity(0.8),
+                    Color(hex: "ffc837").opacity(0.5)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        case .yellow:
+            return LinearGradient(
+                colors: [
+                    Color(hex: "f7971e").opacity(0.8),
+                    Color(hex: "ffd200").opacity(0.5)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        case .pink:
+            return LinearGradient(
+                colors: [
+                    Color(hex: "dd5e89").opacity(0.8),
+                    Color(hex: "f7bb97").opacity(0.5)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        case .teal:
+            return LinearGradient(
+                colors: [
+                    Color(hex: "11998e").opacity(0.8),
+                    Color(hex: "38ef7d").opacity(0.5)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        case .grey:
+            return LinearGradient(
+                colors: [
+                    Color.gray.opacity(0.6),
+                    Color.gray.opacity(0.3)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        }
     }
     
     var body: some View {
@@ -262,10 +337,10 @@ struct HexagonHabit: View {
         .overlay(
             Group {
                 if isLongPressing {
-                    // Progress outline
+                    // Progress outline with matching gradient
                     RegularPolygon(sides: 6)
                         .trim(from: 0, to: progressValue)
-                        .stroke(outlineGradient, lineWidth: 4)
+                        .stroke(outlineGradient, lineWidth: 5)
                         .rotationEffect(.degrees(120))
                     
                     // Edit button
@@ -286,10 +361,6 @@ struct HexagonHabit: View {
                     }
                 }
             }
-        )
-        .overlay(
-            RegularPolygon(sides: 6)
-                .stroke(outlineGradient, lineWidth: 3)
         )
         .scaleEffect(scale)
         .rotationEffect(.degrees(rotation))
