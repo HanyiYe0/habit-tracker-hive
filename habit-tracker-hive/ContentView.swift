@@ -201,9 +201,11 @@ struct HexagonHabit: View {
     @Binding var habit: Habit
     @State private var opacity: Double = 0
     @State private var scale: CGFloat = 1.0
-    @State private var rotation: Double = 0.0  // Add rotation state
-    @State private var animationInProgress = false  // Track animation state
+    @State private var rotation: Double = 0.0
     @State private var showingComments = false
+    @State private var showingEditSheet = false
+    @State private var isLongPressing = false
+    @State private var dragOffset: CGFloat = 0
     
     var body: some View {
         VStack(spacing: 2) {
@@ -242,61 +244,105 @@ struct HexagonHabit: View {
                 .shadow(color: .black.opacity(0.2), radius: 5)
         )
         .scaleEffect(scale)
-        .rotationEffect(.degrees(rotation))  // Add rotation effect
+        .rotationEffect(.degrees(rotation))
         .opacity(opacity)
         .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+            withAnimation(.easeIn(duration: 0.3)) {
                 opacity = 1
             }
         }
+        .overlay(
+            Group {
+                if isLongPressing {
+                    HStack(spacing: 0) {
+                        // Left side - Edit
+                        Rectangle()
+                            .fill(Color.blue.opacity(0.3))
+                            .overlay(
+                                Image(systemName: "pencil")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.blue)
+                            )
+                        
+                        // Right side - Increment
+                        Rectangle()
+                            .fill(Color.green.opacity(0.3))
+                            .overlay(
+                                Image(systemName: "plus")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.green)
+                            )
+                    }
+                    .clipShape(RegularPolygon(sides: 6))
+                }
+            }
+        )
         .gesture(
-            LongPressGesture(minimumDuration: 0.5)  // Reduce duration for faster response
-                .onEnded { _ in
-                    if !animationInProgress {  // Prevent multiple animations
-                        incrementCount()
+            DragGesture(minimumDistance: 0)
+                .simultaneously(with: LongPressGesture(minimumDuration: 0.3))
+                .onEnded { value in
+                    let dragGesture = value.first!
+                    handleDragEnd(location: dragGesture.location)
+                }
+                .onChanged { value in
+                    if let dragGesture = value.first {
+                        handleDrag(location: dragGesture.location)
                     }
                 }
         )
         .sheet(isPresented: $showingComments) {
             CommentSheet(habit: $habit)
         }
+        .sheet(isPresented: $showingEditSheet) {
+            EditHabitForm(habit: $habit, isPresented: $showingEditSheet)
+        }
+    }
+    
+    private func handleDrag(location: CGPoint) {
+        isLongPressing = true
+        dragOffset = location.x - habit.size/2
+        
+        // Visual feedback based on drag position
+        withAnimation(.easeInOut(duration: 0.2)) {
+            if dragOffset < 0 {
+                rotation = -5 // Tilt left for edit
+            } else {
+                rotation = 5  // Tilt right for increment
+            }
+        }
+    }
+    
+    private func handleDragEnd(location: CGPoint) {
+        let dragOffset = location.x - habit.size/2
+        
+        // Haptic feedback
+        let impactGenerator = UIImpactFeedbackGenerator(style: .medium)
+        impactGenerator.impactOccurred()
+        
+        if dragOffset < 0 {
+            // Left side - Edit
+            showingEditSheet = true
+        } else {
+            // Right side - Increment
+            incrementCount()
+        }
+        
+        // Reset states
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            isLongPressing = false
+            rotation = 0
+            scale = 1.0
+        }
     }
     
     private func incrementCount() {
-        animationInProgress = true
-        
-        // Haptic feedback
-        let impactGenerator = UIImpactFeedbackGenerator(style: .heavy)
-        impactGenerator.impactOccurred()
-        
-        // First phase: Scale up and rotate
-        withAnimation(.easeIn(duration: 0.15)) {
-            scale = 1.4
-            rotation = 15
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+            scale = 1.2
+            habit.count += 1
         }
         
-        // Second phase: Increment count and start settling
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            habit.count += 1
-            
-            // Scale down and rotate back
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
-                scale = 0.8
-                rotation = -5
-            }
-            
-            // Final phase: Return to normal
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
-                    scale = 1.0
-                    rotation = 0
-                }
-                
-                // Reset animation flag
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    animationInProgress = false
-                }
-            }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.5).delay(0.1)) {
+            scale = 1.0
         }
     }
 }
@@ -448,7 +494,7 @@ struct AddHabitForm: View {
                 }
                 
                 Section(header: Text("Progress")) {
-                    Stepper("Current Count: \(count)", value: $count)
+                    Stepper("Current Count: \(count)", value: $count, in: 0...Int.max)
                 }
             }
             .navigationTitle("New Habit")
@@ -458,7 +504,7 @@ struct AddHabitForm: View {
                 },
                 trailing: Button("Add") {
                     let newPosition = calculateNextPosition()
-                    let newHabit = Habit(
+                    var newHabit = Habit(
                         position: newPosition,
                         title: title.isEmpty ? "New Habit" : title,
                         frequency: frequency,
@@ -467,16 +513,11 @@ struct AddHabitForm: View {
                         description: description,
                         priority: priority,
                         count: count,
-                        isAnimating: false
+                        isAnimating: true  // Set this to true initially
                     )
                     
                     withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                         habits.append(newHabit)
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            if let index = habits.firstIndex(where: { $0.id == newHabit.id }) {
-                                habits[index].isAnimating = true
-                            }
-                        }
                     }
                     isPresented = false
                 }
@@ -622,6 +663,84 @@ struct CommentSheet: View {
                     }
                 }
             }
+        }
+    }
+}
+
+// Add EditHabitForm for editing existing habits
+struct EditHabitForm: View {
+    @Binding var habit: Habit
+    @Binding var isPresented: Bool
+    @State private var title: String
+    @State private var frequency: Frequency
+    @State private var customFrequency: String
+    @State private var priority: Priority
+    private let titleLimit = 20
+    private let customFrequencyLimit = 15
+    
+    init(habit: Binding<Habit>, isPresented: Binding<Bool>) {
+        self._habit = habit
+        self._isPresented = isPresented
+        self._title = State(initialValue: habit.wrappedValue.title)
+        self._frequency = State(initialValue: habit.wrappedValue.frequency)
+        self._customFrequency = State(initialValue: habit.wrappedValue.customFrequency)
+        self._priority = State(initialValue: habit.wrappedValue.priority)
+    }
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                // Similar to AddHabitForm but for editing
+                Section(header: Text("Basic Information")) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        TextField("Habit Name", text: Binding(
+                            get: { title },
+                            set: { title = String($0.prefix(titleLimit)) }
+                        ))
+                        
+                        Text("\(title.count)/\(titleLimit)")
+                            .font(.caption)
+                            .foregroundColor(title.count >= titleLimit ? .red : .gray)
+                    }
+                    
+                    Picker("Priority", selection: $priority) {
+                        ForEach(Priority.allCases, id: \.self) { priority in
+                            Text(priority.rawValue)
+                        }
+                    }
+                    
+                    Picker("Frequency", selection: $frequency) {
+                        ForEach(Frequency.allCases, id: \.self) { frequency in
+                            Text(frequency.rawValue)
+                        }
+                    }
+                    
+                    if frequency == .custom {
+                        VStack(alignment: .leading, spacing: 4) {
+                            TextField("Custom Frequency", text: Binding(
+                                get: { customFrequency },
+                                set: { customFrequency = String($0.prefix(customFrequencyLimit)) }
+                            ))
+                            
+                            Text("\(customFrequency.count)/\(customFrequencyLimit)")
+                                .font(.caption)
+                                .foregroundColor(customFrequency.count >= customFrequencyLimit ? .red : .gray)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Edit Habit")
+            .navigationBarItems(
+                leading: Button("Cancel") { isPresented = false },
+                trailing: Button("Save") {
+                    habit.title = title
+                    habit.frequency = frequency
+                    habit.customFrequency = customFrequency
+                    habit.priority = priority
+                    isPresented = false
+                }
+                .disabled(title.isEmpty || (frequency == .custom && customFrequency.isEmpty))
+            )
         }
     }
 }
