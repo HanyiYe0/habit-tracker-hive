@@ -594,6 +594,31 @@ struct ContentView: View {
         abs(offset.width) > 1 || abs(offset.height) > 1
     }
     
+    // Add function to calculate center of all habits
+    private func calculateCenterOffset(in geometry: GeometryProxy) -> CGSize {
+        guard !habits.isEmpty else { return .zero }
+        
+        // Calculate the bounds of all habits
+        let positions = habits.map { $0.position }
+        let minX = positions.min { $0.x < $1.x }?.x ?? 0
+        let maxX = positions.max { $0.x < $1.x }?.x ?? 0
+        let minY = positions.min { $0.y < $1.y }?.y ?? 0
+        let maxY = positions.max { $0.y < $1.y }?.y ?? 0
+        
+        // Calculate center of habits
+        let centerX = (minX + maxX) / 2
+        let centerY = (minY + maxY) / 2
+        
+        // Calculate required offset to center habits in viewport
+        let screenCenterX = geometry.size.width / 2
+        let screenCenterY = geometry.size.height / 2
+        
+        return CGSize(
+            width: screenCenterX - centerX,
+            height: screenCenterY - centerY
+        )
+    }
+    
     var body: some View {
         GeometryReader { geometry in
             let centerPosition = CGPoint(
@@ -613,15 +638,16 @@ struct ContentView: View {
                 }
                 .offset(offset)
                 
-                // Reset position button in top right
+                // Updated reset position button
                 if isViewMoved {
                     VStack {
                         HStack {
                             Spacer()
                             Button(action: {
+                                let newOffset = calculateCenterOffset(in: geometry)
                                 withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
-                                    offset = .zero
-                                    lastDragPosition = .zero
+                                    offset = newOffset
+                                    lastDragPosition = newOffset
                                 }
                             }) {
                                 Image(systemName: "house.circle.fill")
@@ -633,7 +659,7 @@ struct ContentView: View {
                                     .shadow(radius: 2)
                             }
                             .padding()
-                            .transition(.opacity) // Add fade transition
+                            .transition(.opacity)
                         }
                         Spacer()
                     }
