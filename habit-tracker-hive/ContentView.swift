@@ -205,7 +205,23 @@ struct HexagonHabit: View {
     @State private var showingComments = false
     @State private var showingEditSheet = false
     @State private var isLongPressing = false
-    @State private var dragOffset: CGFloat = 0
+    @State private var progressValue: CGFloat = 0
+    @State private var editButtonOpacity: Double = 0
+    @State private var dragPosition: CGPoint = .zero
+    
+    private let longPressThreshold: TimeInterval = 1.0
+    
+    // Add computed property for outline gradient
+    private var outlineGradient: LinearGradient {
+        LinearGradient(
+            gradient: Gradient(colors: [
+                Color.white.opacity(0.8),
+                Color("AccentColor").opacity(0.5) // Use a defined accent color
+            ]),
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
     
     var body: some View {
         VStack(spacing: 2) {
@@ -243,6 +259,38 @@ struct HexagonHabit: View {
                 .fill(habit.gradientStyle.gradient)
                 .shadow(color: .black.opacity(0.2), radius: 5)
         )
+        .overlay(
+            Group {
+                if isLongPressing {
+                    // Progress outline
+                    RegularPolygon(sides: 6)
+                        .trim(from: 0, to: progressValue)
+                        .stroke(outlineGradient, lineWidth: 4)
+                        .rotationEffect(.degrees(120))
+                    
+                    // Edit button
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Button(action: {}) {
+                                Image(systemName: "pencil.circle.fill")
+                                    .font(.system(size: 30))
+                                    .foregroundColor(.blue)
+                                    .background(Color.white)
+                                    .clipShape(Circle())
+                            }
+                            .offset(x: 10, y: -10)
+                            .opacity(editButtonOpacity)
+                        }
+                        Spacer()
+                    }
+                }
+            }
+        )
+        .overlay(
+            RegularPolygon(sides: 6)
+                .stroke(outlineGradient, lineWidth: 3)
+        )
         .scaleEffect(scale)
         .rotationEffect(.degrees(rotation))
         .opacity(opacity)
@@ -251,43 +299,15 @@ struct HexagonHabit: View {
                 opacity = 1
             }
         }
-        .overlay(
-            Group {
-                if isLongPressing {
-                    HStack(spacing: 0) {
-                        // Left side - Edit
-                        Rectangle()
-                            .fill(Color.blue.opacity(0.3))
-                            .overlay(
-                                Image(systemName: "pencil")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(.blue)
-                            )
-                        
-                        // Right side - Increment
-                        Rectangle()
-                            .fill(Color.green.opacity(0.3))
-                            .overlay(
-                                Image(systemName: "plus")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(.green)
-                            )
-                    }
-                    .clipShape(RegularPolygon(sides: 6))
-                }
-            }
-        )
         .gesture(
             DragGesture(minimumDistance: 0)
-                .simultaneously(with: LongPressGesture(minimumDuration: 0.3))
-                .onEnded { value in
-                    let dragGesture = value.first!
-                    handleDragEnd(location: dragGesture.location)
-                }
+                .simultaneously(with: LongPressGesture(minimumDuration: 0))
                 .onChanged { value in
-                    if let dragGesture = value.first {
-                        handleDrag(location: dragGesture.location)
-                    }
+                    let drag = value.first!
+                    handleGestureChange(location: drag.location, time: drag.time)
+                }
+                .onEnded { _ in
+                    handleGestureEnd()
                 }
         )
         .sheet(isPresented: $showingComments) {
@@ -298,44 +318,73 @@ struct HexagonHabit: View {
         }
     }
     
-    private func handleDrag(location: CGPoint) {
-        isLongPressing = true
-        dragOffset = location.x - habit.size/2
-        
-        // Visual feedback based on drag position
-        withAnimation(.easeInOut(duration: 0.2)) {
-            if dragOffset < 0 {
-                rotation = -5 // Tilt left for edit
-            } else {
-                rotation = 5  // Tilt right for increment
+    private func handleGestureChange(location: CGPoint, time: Date) {
+        if !isLongPressing {
+            isLongPressing = true
+            dragPosition = location
+            
+            // Start progress animation
+            withAnimation(.linear(duration: longPressThreshold)) {
+                progressValue = 1.0
             }
+            
+            // Show edit button
+            withAnimation(.easeIn(duration: 0.2)) {
+                editButtonOpacity = 1.0
+            }
+        }
+        
+        // Improved edit button hit testing
+        let editButtonSize: CGFloat = 44  // Increased touch area
+        let editButtonCenter = CGPoint(
+            x: habit.size/2 + 10,
+            y: -habit.size/2 - 10
+        )
+        
+        let distance = sqrt(
+            pow(location.x - dragPosition.x - editButtonCenter.x, 2) +
+            pow(location.y - dragPosition.y - editButtonCenter.y, 2)
+        )
+        
+        let isOverEditButton = distance < editButtonSize/2
+        
+        withAnimation(.easeInOut(duration: 0.2)) {
+            scale = isOverEditButton ? 1.1 : 1.0
+            rotation = isOverEditButton ? -5 : 0
         }
     }
     
-    private func handleDragEnd(location: CGPoint) {
-        let dragOffset = location.x - habit.size/2
+    private func handleGestureEnd() {
+        let editButtonSize: CGFloat = 44
+        let editButtonCenter = CGPoint(
+            x: habit.size/2 + 10,
+            y: -habit.size/2 - 10
+        )
         
-        // Haptic feedback
-        let impactGenerator = UIImpactFeedbackGenerator(style: .medium)
-        impactGenerator.impactOccurred()
+        let distance = sqrt(
+            pow(dragPosition.x - editButtonCenter.x, 2) +
+            pow(dragPosition.y - editButtonCenter.y, 2)
+        )
         
-        if dragOffset < 0 {
-            // Left side - Edit
+        if distance < editButtonSize/2 {
             showingEditSheet = true
-        } else {
-            // Right side - Increment
+        } else if progressValue >= 0.98 && !showingEditSheet {
             incrementCount()
         }
         
-        // Reset states
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+        withAnimation {
             isLongPressing = false
-            rotation = 0
+            progressValue = 0
+            editButtonOpacity = 0
             scale = 1.0
+            rotation = 0
         }
     }
     
     private func incrementCount() {
+        let impactGenerator = UIImpactFeedbackGenerator(style: .medium)
+        impactGenerator.impactOccurred()
+        
         withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
             scale = 1.2
             habit.count += 1
@@ -504,7 +553,7 @@ struct AddHabitForm: View {
                 },
                 trailing: Button("Add") {
                     let newPosition = calculateNextPosition()
-                    var newHabit = Habit(
+                    let newHabit = Habit(
                         position: newPosition,
                         title: title.isEmpty ? "New Habit" : title,
                         frequency: frequency,
