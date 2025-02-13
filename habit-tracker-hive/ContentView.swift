@@ -499,44 +499,82 @@ struct CommentSheet: View {
     
     var body: some View {
         NavigationView {
-            VStack {
-                List {
-                    ForEach(habit.comments) { comment in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(comment.text)
-                                .foregroundColor(.black)
-                            Text(comment.date.formatted())
-                                .font(.caption)
-                                .foregroundColor(.gray)
+            VStack(spacing: 0) {
+                // Header with habit info
+                VStack(spacing: 8) {
+                    Text(habit.title)
+                        .font(.title2)
+                        .fontWeight(.medium)
+                    
+                    Text("\(habit.comments.count) comments")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
+                .padding(.vertical, 20)
+                .frame(maxWidth: .infinity)
+                .background(Color.white)
+                
+                // Comments list
+                if habit.comments.isEmpty {
+                    Spacer()
+                    Text("No comments yet")
+                        .foregroundColor(.gray)
+                        .italic()
+                    Spacer()
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            ForEach(habit.comments) { comment in
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(comment.text)
+                                        .foregroundColor(.black)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    
+                                    Text(comment.date.formatted(date: .abbreviated, time: .shortened))
+                                        .font(.caption2)
+                                        .foregroundColor(.gray)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding()
+                                .background(Color.gray.opacity(0.05))
+                                .cornerRadius(12)
+                            }
                         }
-                        .padding(.vertical, 4)
+                        .padding()
                     }
                 }
                 
-                HStack {
-                    TextField("Add a comment", text: $newComment)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-                    
-                    Button(action: {
-                        if !newComment.isEmpty {
-                            habit.comments.append(Comment(text: newComment, date: Date()))
-                            newComment = ""
+                // Comment input area
+                VStack(spacing: 0) {
+                    Divider()
+                    HStack(spacing: 12) {
+                        TextField("Add a comment...", text: $newComment)
+                            .textFieldStyle(.plain)
+                            .padding(.vertical, 12)
+                        
+                        Button(action: {
+                            if !newComment.isEmpty {
+                                habit.comments.append(Comment(text: newComment, date: Date()))
+                                newComment = ""
+                            }
+                        }) {
+                            Image(systemName: "arrow.up.circle.fill")
+                                .foregroundColor(newComment.isEmpty ? .gray : .black)
+                                .font(.system(size: 24))
                         }
-                    }) {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .foregroundColor(.black)
-                            .font(.title2)
+                        .disabled(newComment.isEmpty)
                     }
+                    .padding(.horizontal)
+                    .background(Color.white)
                 }
-                .padding()
             }
-            .navigationTitle("Comments")
-            .navigationBarTitleDisplayMode(.inline)
+            .background(Color.gray.opacity(0.05))
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.black)
+                            .font(.system(size: 24))
                     }
                 }
             }
