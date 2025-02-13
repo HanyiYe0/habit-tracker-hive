@@ -146,12 +146,21 @@ struct Habit: Identifiable {
     var position: CGPoint
     var title: String
     var frequency: Frequency
+    var customFrequency: String = ""  // Add this property
     var gradientStyle: GradientStyle
     var description: String
     var priority: Priority
     var count: Int
     var isAnimating: Bool
     var comments: [Comment] = []  // Add comments array
+    
+    // Add computed property for display frequency
+    var displayFrequency: String {
+        if frequency == .custom {
+            return customFrequency
+        }
+        return frequency.displayText
+    }
     
     // Computed property for hexagon size based on priority
     var size: CGFloat {
@@ -170,6 +179,14 @@ enum Frequency: String, CaseIterable {
     case weekly = "Weekly"
     case monthly = "Monthly"
     case custom = "Custom"
+    
+    // Add custom text property
+    var displayText: String {
+        if case .custom = self {
+            return "" // Will be replaced by customFrequency
+        }
+        return self.rawValue.lowercased()
+    }
 }
 
 // Priority enum for habit importance
@@ -197,10 +214,12 @@ struct HexagonHabit: View {
             Text(habit.title)
                 .font(.system(size: 17))
                 .foregroundColor(.black.opacity(0.6))
+                .lineLimit(1)
             
-            Text(habit.frequency.rawValue.lowercased())
+            Text(habit.displayFrequency)
                 .font(.system(size: 15))
                 .foregroundColor(.black.opacity(0.4))
+                .lineLimit(1)
             
             // Add comment button
             Button(action: {
@@ -355,12 +374,24 @@ struct AddHabitForm: View {
     @State private var priority: Priority = .medium
     @State private var count: Int = 0
     @State private var gradientStyle: GradientStyle = .blue
+    @State private var customFrequency: String = ""
+    private let titleLimit = 20
+    private let customFrequencyLimit = 15
     
     var body: some View {
         NavigationView {
             Form {
                 Section(header: Text("Basic Information")) {
-                    TextField("Habit Name", text: $title)
+                    VStack(alignment: .leading, spacing: 4) {
+                        TextField("Habit Name", text: Binding(
+                            get: { title },
+                            set: { title = String($0.prefix(titleLimit)) }
+                        ))
+                        
+                        Text("\(title.count)/\(titleLimit)")
+                            .font(.caption)
+                            .foregroundColor(title.count >= titleLimit ? .red : .gray)
+                    }
                     
                     Picker("Priority", selection: $priority) {
                         ForEach(Priority.allCases, id: \.self) { priority in
@@ -371,6 +402,19 @@ struct AddHabitForm: View {
                     Picker("Frequency", selection: $frequency) {
                         ForEach(Frequency.allCases, id: \.self) { frequency in
                             Text(frequency.rawValue)
+                        }
+                    }
+                    
+                    if frequency == .custom {
+                        VStack(alignment: .leading, spacing: 4) {
+                            TextField("Custom Frequency", text: Binding(
+                                get: { customFrequency },
+                                set: { customFrequency = String($0.prefix(customFrequencyLimit)) }
+                            ))
+                            
+                            Text("\(customFrequency.count)/\(customFrequencyLimit)")
+                                .font(.caption)
+                                .foregroundColor(customFrequency.count >= customFrequencyLimit ? .red : .gray)
                         }
                     }
                 }
@@ -418,6 +462,7 @@ struct AddHabitForm: View {
                         position: newPosition,
                         title: title.isEmpty ? "New Habit" : title,
                         frequency: frequency,
+                        customFrequency: customFrequency,
                         gradientStyle: gradientStyle,
                         description: description,
                         priority: priority,
@@ -435,7 +480,7 @@ struct AddHabitForm: View {
                     }
                     isPresented = false
                 }
-                .disabled(title.isEmpty)
+                .disabled(title.isEmpty || (frequency == .custom && customFrequency.isEmpty))
             )
         }
     }
@@ -446,7 +491,6 @@ struct AddHabitForm: View {
         
         // Calculate spacing based on maximum hexagon size
         let width = maxSize * sqrt(3)
-        let height = maxSize * 2
         let horizontalSpacing = width * 0.58
         
         // First habit goes in center
