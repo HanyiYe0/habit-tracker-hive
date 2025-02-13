@@ -96,8 +96,8 @@ enum GradientStyle {
         case .grey:
             return LinearGradient(
                 colors: [
-                    Color(hex: "f0f0f0"),
-                    Color(hex: "d9d9d9")
+                    Color.gray.opacity(0.6),
+                    Color.gray.opacity(0.3)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -207,8 +207,10 @@ struct HexagonHabit: View {
     @State private var isLongPressing = false
     @State private var progressValue: CGFloat = 0
     @State private var editButtonOpacity: Double = 0
-    @State private var dragPosition: CGPoint = .zero
+    @State private var dragLocation: CGPoint = .zero
+    @State private var isOverEditButton: Bool = false
     
+    private let editButtonSize: CGFloat = 60
     private let longPressThreshold: TimeInterval = 1.0
     
     // Update the outline gradient based on the habit's gradient style
@@ -337,7 +339,7 @@ struct HexagonHabit: View {
         .overlay(
             Group {
                 if isLongPressing {
-                    // Progress outline with matching gradient
+                    // Progress outline
                     RegularPolygon(sides: 6)
                         .trim(from: 0, to: progressValue)
                         .stroke(outlineGradient, lineWidth: 5)
@@ -347,15 +349,13 @@ struct HexagonHabit: View {
                     VStack {
                         HStack {
                             Spacer()
-                            Button(action: {}) {
-                                Image(systemName: "pencil.circle.fill")
-                                    .font(.system(size: 30))
-                                    .foregroundColor(.blue)
-                                    .background(Color.white)
-                                    .clipShape(Circle())
-                            }
-                            .offset(x: 10, y: -10)
-                            .opacity(editButtonOpacity)
+                            Image(systemName: "pencil.circle.fill")
+                                .font(.system(size: 30))
+                                .foregroundColor(.blue)
+                                .background(Color.white)
+                                .clipShape(Circle())
+                                .offset(x: 10, y: -10)
+                                .opacity(editButtonOpacity)
                         }
                         Spacer()
                     }
@@ -375,10 +375,23 @@ struct HexagonHabit: View {
                 .simultaneously(with: LongPressGesture(minimumDuration: 0))
                 .onChanged { value in
                     let drag = value.first!
-                    handleGestureChange(location: drag.location, time: drag.time)
+                    handleGestureChange(location: drag.location)
                 }
                 .onEnded { _ in
-                    handleGestureEnd()
+                    if isOverEditButton {
+                        showingEditSheet = true
+                    } else if progressValue >= 0.98 {
+                        incrementCount()
+                    }
+                    
+                    withAnimation {
+                        isLongPressing = false
+                        progressValue = 0
+                        editButtonOpacity = 0
+                        scale = 1.0
+                        rotation = 0
+                        isOverEditButton = false
+                    }
                 }
         )
         .sheet(isPresented: $showingComments) {
@@ -389,66 +402,39 @@ struct HexagonHabit: View {
         }
     }
     
-    private func handleGestureChange(location: CGPoint, time: Date) {
+    private func handleGestureChange(location: CGPoint) {
         if !isLongPressing {
             isLongPressing = true
-            dragPosition = location
+            dragLocation = location
             
-            // Start progress animation
             withAnimation(.linear(duration: longPressThreshold)) {
                 progressValue = 1.0
             }
             
-            // Show edit button
             withAnimation(.easeIn(duration: 0.2)) {
                 editButtonOpacity = 1.0
             }
         }
         
-        // Improved edit button hit testing
-        let editButtonSize: CGFloat = 44  // Increased touch area
-        let editButtonCenter = CGPoint(
-            x: habit.size/2 + 10,
-            y: -habit.size/2 - 10
+        let editButtonFrame = CGRect(
+            x: habit.size/2 - editButtonSize/2,
+            y: -habit.size/2 - editButtonSize/2 - 5,
+            width: editButtonSize,
+            height: editButtonSize
         )
         
-        let distance = sqrt(
-            pow(location.x - dragPosition.x - editButtonCenter.x, 2) +
-            pow(location.y - dragPosition.y - editButtonCenter.y, 2)
+        let dragPoint = CGPoint(
+            x: location.x - dragLocation.x,
+            y: location.y - dragLocation.y
         )
         
-        let isOverEditButton = distance < editButtonSize/2
-        
-        withAnimation(.easeInOut(duration: 0.2)) {
-            scale = isOverEditButton ? 1.1 : 1.0
-            rotation = isOverEditButton ? -5 : 0
-        }
-    }
-    
-    private func handleGestureEnd() {
-        let editButtonSize: CGFloat = 44
-        let editButtonCenter = CGPoint(
-            x: habit.size/2 + 10,
-            y: -habit.size/2 - 10
-        )
-        
-        let distance = sqrt(
-            pow(dragPosition.x - editButtonCenter.x, 2) +
-            pow(dragPosition.y - editButtonCenter.y, 2)
-        )
-        
-        if distance < editButtonSize/2 {
-            showingEditSheet = true
-        } else if progressValue >= 0.98 && !showingEditSheet {
-            incrementCount()
-        }
-        
-        withAnimation {
-            isLongPressing = false
-            progressValue = 0
-            editButtonOpacity = 0
-            scale = 1.0
-            rotation = 0
+        let isOver = editButtonFrame.contains(dragPoint)
+        if isOver != isOverEditButton {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isOverEditButton = isOver
+                scale = isOver ? 1.1 : 1.0
+                rotation = isOver ? -5 : 0
+            }
         }
     }
     
