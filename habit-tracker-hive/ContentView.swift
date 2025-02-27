@@ -199,6 +199,7 @@ enum Priority: String, CaseIterable {
 // Hexagon habit view
 struct HexagonHabit: View {
     @Binding var habit: Habit
+    var editAction: () -> Void
     @State private var opacity: Double = 0
     @State private var scale: CGFloat = 1.0
     @State private var rotation: Double = 0.0
@@ -209,8 +210,11 @@ struct HexagonHabit: View {
     @State private var editButtonOpacity: Double = 0
     @State private var dragLocation: CGPoint = .zero
     @State private var isOverEditButton: Bool = false
+    @State private var lastEditSheetState: Bool = false
+    @State private var debugTapLocation: CGPoint? = nil
+    @State private var debugButtonCenter: CGPoint? = nil
     
-    private let editButtonSize: CGFloat = 60
+    private let editButtonSize: CGFloat = 44
     private let longPressThreshold: TimeInterval = 1.0
     
     // Update the outline gradient based on the habit's gradient style
@@ -301,67 +305,86 @@ struct HexagonHabit: View {
     }
     
     var body: some View {
-        VStack(spacing: 2) {
-            Text("\(habit.count)")
-                .font(.system(size: 25, weight: .bold))
-                .foregroundColor(.black)
-            
-            Text(habit.title)
-                .font(.system(size: 17))
-                .foregroundColor(.black.opacity(0.6))
-                .lineLimit(1)
-            
-            Text(habit.displayFrequency)
-                .font(.system(size: 15))
-                .foregroundColor(.black.opacity(0.4))
-                .lineLimit(1)
-            
-            // Add comment button
-            Button(action: {
-                showingComments = true
-            }) {
-                VStack(spacing: 2) {
-                    Image(systemName: "bubble.left")
-                        .font(.system(size: 14))
-                    Text("\(habit.comments.count)")
-                        .font(.system(size: 12))
-                }
-                .foregroundColor(.black.opacity(0.4))
-            }
-            .offset(y: 5)
-        }
-        .frame(width: habit.size, height: habit.size)
-        .background(
+        ZStack {
+            // Background hexagon
             RegularPolygon(sides: 6)
                 .fill(habit.gradientStyle.gradient)
+                .frame(width: habit.size, height: habit.size)
                 .shadow(color: .black.opacity(0.2), radius: 5)
-        )
-        .overlay(
-            Group {
-                if isLongPressing {
-                    // Progress outline
-                    RegularPolygon(sides: 6)
-                        .trim(from: 0, to: progressValue)
-                        .stroke(outlineGradient, lineWidth: 5)
-                        .rotationEffect(.degrees(120))
-                    
-                    // Edit button
-                    VStack {
-                        HStack {
-                            Spacer()
-                            Image(systemName: "pencil.circle.fill")
-                                .font(.system(size: 30))
-                                .foregroundColor(.blue)
-                                .background(Color.white)
-                                .clipShape(Circle())
-                                .offset(x: 10, y: -10)
-                                .opacity(editButtonOpacity)
-                        }
-                        Spacer()
+            
+            // Content
+            VStack(spacing: 2) {
+                Text("\(habit.count)")
+                    .font(.system(size: 25, weight: .bold))
+                    .foregroundColor(.black)
+                
+                Text(habit.title)
+                    .font(.system(size: 17))
+                    .foregroundColor(.black.opacity(0.6))
+                    .lineLimit(1)
+                
+                Text(habit.displayFrequency)
+                    .font(.system(size: 15))
+                    .foregroundColor(.black.opacity(0.4))
+                    .lineLimit(1)
+                
+                // Add comment button
+                Button(action: {
+                    showingComments = true
+                }) {
+                    VStack(spacing: 2) {
+                        Image(systemName: "bubble.left")
+                            .font(.system(size: 14))
+                        Text("\(habit.comments.count)")
+                            .font(.system(size: 12))
                     }
+                    .foregroundColor(.black.opacity(0.4))
+                }
+                .offset(y: 5)
+            }
+            .padding(.horizontal)
+            .frame(width: habit.size, height: habit.size)
+            
+            // Progress outline (when long pressing)
+            if isLongPressing {
+                RegularPolygon(sides: 6)
+                    .trim(from: 0, to: progressValue)
+                    .stroke(outlineGradient, lineWidth: 5)
+                    .rotationEffect(.degrees(120))
+                    .frame(width: habit.size, height: habit.size)
+            }
+            
+            // Edit button with correct positioning (top-right corner)
+            if isLongPressing {
+                ZStack(alignment: .topTrailing) {
+                    Color.clear
+                        .frame(width: habit.size, height: habit.size)
+                    
+                    // Edit button with smaller hit area
+                    Image(systemName: "pencil.circle.fill")
+                        .font(.system(size: 30))
+                        .foregroundColor(.blue)
+                        .background(Circle().fill(Color.white))
+                        .clipShape(Circle())
+                        .opacity(editButtonOpacity)
+                        .background(
+                            Circle()
+                                .fill(Color.red.opacity(0.3))
+                                .frame(width: 40, height: 40) // Smaller hit area (was 50)
+                        )
+                        .padding(5) // Add padding to position from edge
                 }
             }
-        )
+            
+            // Debug tap location
+            if isLongPressing, let tap = debugTapLocation {
+                Circle()
+                    .fill(Color.green.opacity(0.5))
+                    .frame(width: 20, height: 20)
+                    .position(tap)
+            }
+        }
+        .frame(width: habit.size, height: habit.size)
         .scaleEffect(scale)
         .rotationEffect(.degrees(rotation))
         .opacity(opacity)
@@ -371,41 +394,30 @@ struct HexagonHabit: View {
             }
         }
         .gesture(
-            DragGesture(minimumDistance: 0)
+            DragGesture(minimumDistance: 0, coordinateSpace: .local)
                 .simultaneously(with: LongPressGesture(minimumDuration: 0))
                 .onChanged { value in
                     let drag = value.first!
                     handleGestureChange(location: drag.location)
                 }
                 .onEnded { _ in
-                    if isOverEditButton {
-                        showingEditSheet = true
-                    } else if progressValue >= 0.98 {
-                        incrementCount()
-                    }
-                    
-                    withAnimation {
-                        isLongPressing = false
-                        progressValue = 0
-                        editButtonOpacity = 0
-                        scale = 1.0
-                        rotation = 0
-                        isOverEditButton = false
-                    }
+                    handleGestureEnd()
                 }
         )
         .sheet(isPresented: $showingComments) {
             CommentSheet(habit: $habit)
-        }
-        .sheet(isPresented: $showingEditSheet) {
-            EditHabitForm(habit: $habit, isPresented: $showingEditSheet)
+                .onAppear { print("Comment sheet appeared") }
+                .onDisappear { print("Comment sheet disappeared") }
         }
     }
     
     private func handleGestureChange(location: CGPoint) {
         if !isLongPressing {
             isLongPressing = true
+            
+            // Store the original start position of the gesture
             dragLocation = location
+            print("GESTURE START: Location: \(location), Habit size: \(habit.size)")
             
             withAnimation(.linear(duration: longPressThreshold)) {
                 progressValue = 1.0
@@ -416,25 +428,55 @@ struct HexagonHabit: View {
             }
         }
         
-        let editButtonFrame = CGRect(
-            x: habit.size/2 - editButtonSize/2,
-            y: -habit.size/2 - editButtonSize/2 - 5,
-            width: editButtonSize,
-            height: editButtonSize
+        // Update debug tap location
+        debugTapLocation = location
+        
+        // UPDATED: Edit button position calculation for top-right corner
+        let padding: CGFloat = 5 // Match padding in view
+        let buttonPosition = CGPoint(x: habit.size - 20 - padding, y: 20 + padding) // Center of button
+        
+        // Calculate distance from current location to button
+        let distance = sqrt(
+            pow(location.x - buttonPosition.x, 2) +
+            pow(location.y - buttonPosition.y, 2)
         )
         
-        let dragPoint = CGPoint(
-            x: location.x - dragLocation.x,
-            y: location.y - dragLocation.y
-        )
+        let editButtonRadius: CGFloat = 20 // Smaller radius (was 25)
+        let isOver = distance < editButtonRadius
         
-        let isOver = editButtonFrame.contains(dragPoint)
+        print("GESTURE MOVE: Location: \(location), Button: \(buttonPosition), Distance: \(distance), Is over: \(isOver)")
+        
         if isOver != isOverEditButton {
             withAnimation(.easeInOut(duration: 0.2)) {
                 isOverEditButton = isOver
                 scale = isOver ? 1.1 : 1.0
                 rotation = isOver ? -5 : 0
             }
+        }
+    }
+    
+    private func handleGestureEnd() {
+        print("GESTURE END: Final isOverEditButton: \(isOverEditButton)")
+        
+        if isOverEditButton {
+            print("GESTURE END: Triggering edit action")
+            // Delay resetting state until after edit action
+            DispatchQueue.main.async {
+                editAction()
+            }
+        } else if progressValue >= 0.98 {
+            print("GESTURE END: Incrementing count")
+            incrementCount()
+        }
+        
+        print("GESTURE END: Resetting UI state")
+        withAnimation {
+            isLongPressing = false
+            progressValue = 0
+            editButtonOpacity = 0
+            scale = 1.0
+            rotation = 0
+            isOverEditButton = false
         }
     }
     
@@ -791,62 +833,46 @@ struct EditHabitForm: View {
         self._frequency = State(initialValue: habit.wrappedValue.frequency)
         self._customFrequency = State(initialValue: habit.wrappedValue.customFrequency)
         self._priority = State(initialValue: habit.wrappedValue.priority)
+        
+        print("EditHabitForm initialized with: \(habit.wrappedValue.title)")
     }
     
     var body: some View {
-        NavigationView {
-            Form {
-                // Similar to AddHabitForm but for editing
-                Section(header: Text("Basic Information")) {
+        Form {
+            Section(header: Text("Basic Information")) {
+                VStack(alignment: .leading, spacing: 4) {
+                    TextField("Habit Name", text: $title)
+                        .onAppear { print("Title field appeared with: \(title)") }
+                    
+                    Text("\(title.count)/\(titleLimit)")
+                        .font(.caption)
+                        .foregroundColor(title.count >= titleLimit ? .red : .gray)
+                }
+                
+                Picker("Priority", selection: $priority) {
+                    ForEach(Priority.allCases, id: \.self) { priority in
+                        Text(priority.rawValue)
+                    }
+                }
+                .onAppear { print("Priority picker appeared with: \(priority.rawValue)") }
+                
+                Picker("Frequency", selection: $frequency) {
+                    ForEach(Frequency.allCases, id: \.self) { frequency in
+                        Text(frequency.rawValue)
+                    }
+                }
+                
+                if frequency == .custom {
                     VStack(alignment: .leading, spacing: 4) {
-                        TextField("Habit Name", text: Binding(
-                            get: { title },
-                            set: { title = String($0.prefix(titleLimit)) }
-                        ))
+                        TextField("Custom Frequency", text: $customFrequency)
+                            .onAppear { print("Custom frequency field appeared with: \(customFrequency)") }
                         
-                        Text("\(title.count)/\(titleLimit)")
+                        Text("\(customFrequency.count)/\(customFrequencyLimit)")
                             .font(.caption)
-                            .foregroundColor(title.count >= titleLimit ? .red : .gray)
-                    }
-                    
-                    Picker("Priority", selection: $priority) {
-                        ForEach(Priority.allCases, id: \.self) { priority in
-                            Text(priority.rawValue)
-                        }
-                    }
-                    
-                    Picker("Frequency", selection: $frequency) {
-                        ForEach(Frequency.allCases, id: \.self) { frequency in
-                            Text(frequency.rawValue)
-                        }
-                    }
-                    
-                    if frequency == .custom {
-                        VStack(alignment: .leading, spacing: 4) {
-                            TextField("Custom Frequency", text: Binding(
-                                get: { customFrequency },
-                                set: { customFrequency = String($0.prefix(customFrequencyLimit)) }
-                            ))
-                            
-                            Text("\(customFrequency.count)/\(customFrequencyLimit)")
-                                .font(.caption)
-                                .foregroundColor(customFrequency.count >= customFrequencyLimit ? .red : .gray)
-                        }
+                            .foregroundColor(customFrequency.count >= customFrequencyLimit ? .red : .gray)
                     }
                 }
             }
-            .navigationTitle("Edit Habit")
-            .navigationBarItems(
-                leading: Button("Cancel") { isPresented = false },
-                trailing: Button("Save") {
-                    habit.title = title
-                    habit.frequency = frequency
-                    habit.customFrequency = customFrequency
-                    habit.priority = priority
-                    isPresented = false
-                }
-                .disabled(title.isEmpty || (frequency == .custom && customFrequency.isEmpty))
-            )
         }
     }
 }
@@ -857,6 +883,7 @@ struct ContentView: View {
     @State private var habits: [Habit] = []
     @State private var isAddingHabit = false
     @State private var newHabitPosition: CGPoint = .zero
+    @State private var habitToEdit: Habit.ID? = nil
     
     // Add computed property to check if view is moved
     private var isViewMoved: Bool {
@@ -901,8 +928,11 @@ struct ContentView: View {
                 
                 ZStack {
                     ForEach($habits) { $habit in
-                        HexagonHabit(habit: $habit)
-                            .position(x: habit.position.x, y: habit.position.y)
+                        HexagonHabit(
+                            habit: $habit,
+                            editAction: { habitToEdit = habit.id }
+                        )
+                        .position(x: habit.position.x, y: habit.position.y)
                     }
                 }
                 .offset(offset)
@@ -973,6 +1003,47 @@ struct ContentView: View {
                     position: centerPosition
                 )
             }
+            .fullScreenCover(item: $habitToEdit) { habitId in
+                Group {
+                    if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
+                        let _ = print("Showing edit form for habit: \(habits[habitIndex].title) (ID: \(habits[habitIndex].id))")
+                        let _ = print("Form binding to habit at index \(habitIndex)")
+                        
+                        // Make sure NavigationView fills the entire screen
+                        NavigationView {
+                            EditHabitForm(
+                                habit: $habits[habitIndex],
+                                isPresented: Binding(
+                                    get: { habitToEdit != nil },
+                                    set: { if !$0 { 
+                                        print("Dismissing edit form")
+                                        habitToEdit = nil 
+                                    }}
+                                )
+                            )
+                            .navigationBarItems(
+                                leading: Button("Cancel") {
+                                    print("Cancel button pressed")
+                                    habitToEdit = nil
+                                },
+                                trailing: Button("Done") {
+                                    print("Done button pressed")
+                                    habitToEdit = nil
+                                }
+                            )
+                        }
+                        .onAppear { 
+                            print("Edit FULLSCREEN cover appeared") 
+                        }
+                        .onDisappear { 
+                            print("Edit FULLSCREEN cover disappeared") 
+                        }
+                    } else {
+                        let _ = print("ERROR: Could not find habit with ID \(habitId)")
+                        Text("Could not find habit to edit")
+                    }
+                }
+            }
         }
     }
 }
@@ -981,5 +1052,12 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+    }
+}
+
+// Add this extension after your other extensions
+extension UUID: Identifiable {
+    public var id: UUID {
+        self
     }
 }
