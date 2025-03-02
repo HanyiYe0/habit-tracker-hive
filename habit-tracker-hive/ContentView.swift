@@ -214,6 +214,7 @@ struct HexagonHabit: View {
     @State private var debugTapLocation: CGPoint? = nil
     @State private var debugButtonCenter: CGPoint? = nil
     @State private var currentLocation: CGPoint = .zero
+    @State private var longPressStartTime: Date? = nil
     
     private let editButtonSize: CGFloat = 44
     private let longPressThreshold: TimeInterval = 1.0
@@ -417,9 +418,10 @@ struct HexagonHabit: View {
         if !isLongPressing {
             isLongPressing = true
             
-            // Store the original start position of the gesture
+            // Store the original start position of the gesture and time
             dragLocation = location
-            print("GESTURE START: Location: \(location), Habit size: \(habit.size)")
+            longPressStartTime = Date() // Record when the long press started
+            print("GESTURE START: Location: \(location), Habit size: \(habit.size), Time: \(longPressStartTime!)")
             
             withAnimation(.linear(duration: longPressThreshold)) {
                 progressValue = 1.0
@@ -476,6 +478,16 @@ struct HexagonHabit: View {
     private func handleGestureEnd() {
         print("GESTURE END: Final isOverEditButton: \(isOverEditButton), Progress: \(progressValue)")
         
+        // Calculate how long the user has been pressing
+        let elapsedTime: TimeInterval
+        if let startTime = longPressStartTime {
+            elapsedTime = Date().timeIntervalSince(startTime)
+        } else {
+            elapsedTime = 0
+        }
+        
+        print("GESTURE END: Elapsed time: \(elapsedTime) seconds (threshold: \(longPressThreshold))")
+        
         // Check if final position is inside the hexagon
         let hexagonCenter = CGPoint(x: habit.size/2, y: habit.size/2)
         let distanceFromCenter = sqrt(
@@ -492,15 +504,18 @@ struct HexagonHabit: View {
             DispatchQueue.main.async {
                 editAction()
             }
-        } else if progressValue >= 0.98 && isInsideHexagon {
+        } else if elapsedTime >= longPressThreshold && isInsideHexagon {
             // Only increment count if:
-            // 1. Progress animation is complete (0.98 or higher)
+            // 1. User has held for the required duration (longPressThreshold)
             // 2. User's finger is inside hexagon at the END of the gesture
-            print("GESTURE END: Animation complete and finger ended inside hexagon, incrementing count")
+            print("GESTURE END: Held for required time and finger ended inside hexagon, incrementing count")
             incrementCount()
         } else {
-            print("GESTURE END: Not incrementing count - Progress: \(progressValue), Inside at end: \(isInsideHexagon)")
+            print("GESTURE END: Not incrementing count - Elapsed time: \(elapsedTime), Required: \(longPressThreshold), Inside: \(isInsideHexagon)")
         }
+        
+        // Reset the start time
+        longPressStartTime = nil
         
         print("GESTURE END: Resetting UI state")
         withAnimation {
