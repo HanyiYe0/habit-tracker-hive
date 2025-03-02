@@ -213,6 +213,7 @@ struct HexagonHabit: View {
     @State private var lastEditSheetState: Bool = false
     @State private var debugTapLocation: CGPoint? = nil
     @State private var debugButtonCenter: CGPoint? = nil
+    @State private var currentLocation: CGPoint = .zero
     
     private let editButtonSize: CGFloat = 44
     private let longPressThreshold: TimeInterval = 1.0
@@ -360,7 +361,7 @@ struct HexagonHabit: View {
                     Color.clear
                         .frame(width: habit.size, height: habit.size)
                     
-                    // Edit button with smaller hit area
+                    // Edit button with adjusted position
                     Image(systemName: "pencil.circle.fill")
                         .font(.system(size: 30))
                         .foregroundColor(.blue)
@@ -370,9 +371,10 @@ struct HexagonHabit: View {
                         .background(
                             Circle()
                                 .fill(Color.red.opacity(0.3))
-                                .frame(width: 40, height: 40) // Smaller hit area (was 50)
+                                .frame(width: 40, height: 40)
                         )
-                        .padding(5) // Add padding to position from edge
+                        .padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)) // Adjust to move more to the right
+                        .offset(x: 10, y: -10) // Move more up and to the right
                 }
             }
             
@@ -428,12 +430,27 @@ struct HexagonHabit: View {
             }
         }
         
+        // Update current location
+        currentLocation = location
+        
         // Update debug tap location
         debugTapLocation = location
         
-        // UPDATED: Edit button position calculation for top-right corner
-        let padding: CGFloat = 5 // Match padding in view
-        let buttonPosition = CGPoint(x: habit.size - 20 - padding, y: 20 + padding) // Center of button
+        // Check if tap is inside the hexagon
+        let hexagonCenter = CGPoint(x: habit.size/2, y: habit.size/2)
+        let distanceFromCenter = sqrt(
+            pow(location.x - hexagonCenter.x, 2) +
+            pow(location.y - hexagonCenter.y, 2)
+        )
+        
+        // Simple check for inside hexagon (approximate as circle for now)
+        let isInsideHexagon = distanceFromCenter <= habit.size/2
+        
+        // UPDATED: Edit button position calculation with offset
+        let buttonPosition = CGPoint(
+            x: habit.size - 15, // Move further to the right
+            y: 15 // Move further up
+        )
         
         // Calculate distance from current location to button
         let distance = sqrt(
@@ -441,11 +458,12 @@ struct HexagonHabit: View {
             pow(location.y - buttonPosition.y, 2)
         )
         
-        let editButtonRadius: CGFloat = 20 // Smaller radius (was 25)
+        let editButtonRadius: CGFloat = 20
         let isOver = distance < editButtonRadius
         
-        print("GESTURE MOVE: Location: \(location), Button: \(buttonPosition), Distance: \(distance), Is over: \(isOver)")
+        print("GESTURE MOVE: Location: \(location), Button: \(buttonPosition), Distance: \(distance), Inside Hexagon: \(isInsideHexagon), Is over button: \(isOver)")
         
+        // Update isOverEditButton only if we're over the button
         if isOver != isOverEditButton {
             withAnimation(.easeInOut(duration: 0.2)) {
                 isOverEditButton = isOver
@@ -456,7 +474,17 @@ struct HexagonHabit: View {
     }
     
     private func handleGestureEnd() {
-        print("GESTURE END: Final isOverEditButton: \(isOverEditButton)")
+        print("GESTURE END: Final isOverEditButton: \(isOverEditButton), Progress: \(progressValue)")
+        
+        // Check if final position is inside the hexagon
+        let hexagonCenter = CGPoint(x: habit.size/2, y: habit.size/2)
+        let distanceFromCenter = sqrt(
+            pow(currentLocation.x - hexagonCenter.x, 2) +
+            pow(currentLocation.y - hexagonCenter.y, 2)
+        )
+        
+        // Simple check for inside hexagon (approximate as circle for now)
+        let isInsideHexagon = distanceFromCenter <= habit.size/2
         
         if isOverEditButton {
             print("GESTURE END: Triggering edit action")
@@ -464,9 +492,14 @@ struct HexagonHabit: View {
             DispatchQueue.main.async {
                 editAction()
             }
-        } else if progressValue >= 0.98 {
-            print("GESTURE END: Incrementing count")
+        } else if progressValue >= 0.98 && isInsideHexagon {
+            // Only increment count if:
+            // 1. Progress animation is complete (0.98 or higher)
+            // 2. User's finger is inside hexagon at the END of the gesture
+            print("GESTURE END: Animation complete and finger ended inside hexagon, incrementing count")
             incrementCount()
+        } else {
+            print("GESTURE END: Not incrementing count - Progress: \(progressValue), Inside at end: \(isInsideHexagon)")
         }
         
         print("GESTURE END: Resetting UI state")
