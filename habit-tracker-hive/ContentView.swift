@@ -871,26 +871,48 @@ struct EditHabitForm: View {
     @State private var frequency: Frequency
     @State private var customFrequency: String
     @State private var priority: Priority
+    @State private var count: Int
+    @State private var gradientStyle: GradientStyle
+    @State private var showDeleteConfirmation = false
+    var onDelete: (() -> Void)? = nil
+    
     private let titleLimit = 20
     private let customFrequencyLimit = 15
     
-    init(habit: Binding<Habit>, isPresented: Binding<Bool>) {
+    init(habit: Binding<Habit>, isPresented: Binding<Bool>, onDelete: (() -> Void)? = nil) {
         self._habit = habit
         self._isPresented = isPresented
         self._title = State(initialValue: habit.wrappedValue.title)
         self._frequency = State(initialValue: habit.wrappedValue.frequency)
         self._customFrequency = State(initialValue: habit.wrappedValue.customFrequency)
         self._priority = State(initialValue: habit.wrappedValue.priority)
+        self._count = State(initialValue: habit.wrappedValue.count)
+        self._gradientStyle = State(initialValue: habit.wrappedValue.gradientStyle)
+        self.onDelete = onDelete
         
         print("EditHabitForm initialized with: \(habit.wrappedValue.title)")
+    }
+    
+    // Function to save changes back to the habit
+    private func saveChanges() {
+        habit.title = title
+        habit.frequency = frequency
+        habit.customFrequency = customFrequency
+        habit.priority = priority
+        habit.count = count
+        habit.gradientStyle = gradientStyle
+        
+        isPresented = false
     }
     
     var body: some View {
         Form {
             Section(header: Text("Basic Information")) {
                 VStack(alignment: .leading, spacing: 4) {
-                    TextField("Habit Name", text: $title)
-                        .onAppear { print("Title field appeared with: \(title)") }
+                    TextField("Habit Name", text: Binding(
+                        get: { title },
+                        set: { title = String($0.prefix(titleLimit)) }
+                    ))
                     
                     Text("\(title.count)/\(titleLimit)")
                         .font(.caption)
@@ -902,7 +924,6 @@ struct EditHabitForm: View {
                         Text(priority.rawValue)
                     }
                 }
-                .onAppear { print("Priority picker appeared with: \(priority.rawValue)") }
                 
                 Picker("Frequency", selection: $frequency) {
                     ForEach(Frequency.allCases, id: \.self) { frequency in
@@ -912,8 +933,10 @@ struct EditHabitForm: View {
                 
                 if frequency == .custom {
                     VStack(alignment: .leading, spacing: 4) {
-                        TextField("Custom Frequency", text: $customFrequency)
-                            .onAppear { print("Custom frequency field appeared with: \(customFrequency)") }
+                        TextField("Custom Frequency", text: Binding(
+                            get: { customFrequency },
+                            set: { customFrequency = String($0.prefix(customFrequencyLimit)) }
+                        ))
                         
                         Text("\(customFrequency.count)/\(customFrequencyLimit)")
                             .font(.caption)
@@ -921,6 +944,75 @@ struct EditHabitForm: View {
                     }
                 }
             }
+            
+            Section(header: Text("Appearance")) {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach([
+                            GradientStyle.blue,
+                            GradientStyle.red,
+                            GradientStyle.green,
+                            GradientStyle.light_pink,
+                            GradientStyle.orange,
+                            GradientStyle.yellow,
+                            GradientStyle.pink,
+                            GradientStyle.teal,
+                            GradientStyle.grey
+                        ], id: \.self) { style in
+                            GradientPreview(
+                                gradientStyle: style,
+                                isSelected: gradientStyle == style
+                            )
+                            .onTapGesture {
+                                gradientStyle = style
+                            }
+                        }
+                    }
+                    .padding(.vertical, 8)
+                }
+                .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+            }
+            
+            Section(header: Text("Progress")) {
+                Stepper("Current Count: \(count)", value: $count, in: 0...Int.max)
+            }
+            
+            Section {
+                Button(action: {
+                    showDeleteConfirmation = true
+                }) {
+                    HStack {
+                        Image(systemName: "trash")
+                        Text("Delete Habit")
+                    }
+                    .foregroundColor(.red)
+                }
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("Cancel") {
+                    isPresented = false
+                }
+            }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Done") {
+                    saveChanges()
+                }
+            }
+        }
+        .alert(isPresented: $showDeleteConfirmation) {
+            Alert(
+                title: Text("Delete Habit"),
+                message: Text("Are you sure you want to delete this habit? This action cannot be undone."),
+                primaryButton: .destructive(Text("Delete")) {
+                    if let onDelete = onDelete {
+                        onDelete()
+                    }
+                },
+                secondaryButton: .cancel()
+            )
         }
     }
 }
@@ -1052,44 +1144,30 @@ struct ContentView: View {
                 )
             }
             .fullScreenCover(item: $habitToEdit) { habitId in
-                Group {
-                    if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
-                        let _ = print("Showing edit form for habit: \(habits[habitIndex].title) (ID: \(habits[habitIndex].id))")
-                        let _ = print("Form binding to habit at index \(habitIndex)")
-                        
-                        // Make sure NavigationView fills the entire screen
-                        NavigationView {
-                            EditHabitForm(
-                                habit: $habits[habitIndex],
-                                isPresented: Binding(
-                                    get: { habitToEdit != nil },
-                                    set: { if !$0 { 
-                                        print("Dismissing edit form")
-                                        habitToEdit = nil 
-                                    }}
-                                )
-                            )
-                            .navigationBarItems(
-                                leading: Button("Cancel") {
-                                    print("Cancel button pressed")
-                                    habitToEdit = nil
-                                },
-                                trailing: Button("Done") {
-                                    print("Done button pressed")
-                                    habitToEdit = nil
-                                }
-                            )
-                        }
-                        .onAppear { 
-                            print("Edit FULLSCREEN cover appeared") 
-                        }
-                        .onDisappear { 
-                            print("Edit FULLSCREEN cover disappeared") 
-                        }
-                    } else {
-                        let _ = print("ERROR: Could not find habit with ID \(habitId)")
-                        Text("Could not find habit to edit")
+                if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
+                    let _ = print("Showing edit form for habit: \(habits[habitIndex].title) (ID: \(habits[habitIndex].id))")
+                    
+                    NavigationView {
+                        EditHabitForm(
+                            habit: $habits[habitIndex],
+                            isPresented: Binding(
+                                get: { habitToEdit != nil },
+                                set: { if !$0 { habitToEdit = nil }}
+                            ),
+                            onDelete: {
+                                // Remove the habit from the array
+                                habits.remove(at: habitIndex)
+                                // Close the edit form
+                                habitToEdit = nil
+                            }
+                        )
                     }
+                } else {
+                    Text("Could not find habit to edit")
+                        .onAppear {
+                            print("ERROR: Could not find habit with ID \(habitId)")
+                            habitToEdit = nil
+                        }
                 }
             }
         }
